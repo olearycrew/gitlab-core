@@ -31,4 +31,8 @@ describe 'Projects > Snippets > User views snippets' do
     expect(page).to have_content(project_snippet.title)
     expect(page).not_to have_content(snippet.title)
   end
+
+  it 'contains 4 snippet sections' do
+    expect(page).to have_selector('.snippet-scope-menu li', count: 4)
+  end
 end

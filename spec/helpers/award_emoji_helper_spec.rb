@@ -18,6 +18,16 @@ describe AwardEmojiHelper do
 
         expect(subject).to eq(expected_url)
       end
+
+      context 'when snippet is secret' do
+        let(:snippet) { create(:personal_snippet, :secret) }
+
+        it 'returns correct url' do
+          expected_url = "/snippets/#{note.noteable.id}/notes/#{note.id}/toggle_award_emoji?token=#{snippet.secret_token}"
+
+          expect(subject).to eq(expected_url)
+        end
+      end
     end
 
     context 'note on project item' do
@@ -41,6 +51,16 @@ describe AwardEmojiHelper do
         expected_url = "/snippets/#{snippet.id}/toggle_award_emoji"
 
         expect(subject).to eq(expected_url)
+      end
+
+      context 'when snippet is secret' do
+        let(:snippet) { create(:personal_snippet, :secret) }
+
+        it 'returns correct url' do
+          expected_url = "/snippets/#{snippet.id}/toggle_award_emoji?token=#{snippet.secret_token}"
+
+          expect(subject).to eq(expected_url)
+        end
       end
     end
 

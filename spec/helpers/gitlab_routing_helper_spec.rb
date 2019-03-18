@@ -116,11 +116,17 @@ describe GitlabRoutingHelper do
   context 'snippets' do
     let_it_be(:personal_snippet) { create(:personal_snippet) }
     let_it_be(:project_snippet) { create(:project_snippet) }
+    let_it_be(:secret_snippet) { create(:personal_snippet, :secret) }
     let_it_be(:note) { create(:note_on_personal_snippet, noteable: personal_snippet) }
+    let_it_be(:secret_note) { create(:note_on_personal_snippet, noteable: secret_snippet) }
 
     describe '#snippet_path' do
       it 'returns the personal snippet path' do
         expect(snippet_path(personal_snippet)).to eq("/snippets/#{personal_snippet.id}")
+      end
+
+      it 'returns the path with token for secret snippets' do
+        expect(snippet_path(secret_snippet)).to eq("/snippets/#{secret_snippet.id}?token=#{secret_snippet.secret_token}")
       end
 
       it 'returns the project snippet path' do
@@ -133,6 +139,18 @@ describe GitlabRoutingHelper do
         expect(snippet_url(personal_snippet)).to eq("#{Settings.gitlab['url']}/snippets/#{personal_snippet.id}")
       end
 
+      it 'returns the url with token for secret snippets' do
+        expect(snippet_url(secret_snippet)).to eq("#{Settings.gitlab['url']}/snippets/#{secret_snippet.id}?token=#{secret_snippet.secret_token}")
+      end
+
+      context 'when the secret_snippets flag is disabled' do
+        it 'does not include the token' do
+          stub_feature_flags(secret_snippets: false)
+
+          expect(snippet_url(secret_snippet)).to eq("#{Settings.gitlab['url']}/snippets/#{secret_snippet.id}")
+        end
+      end
+
       it 'returns the project snippet url' do
         expect(snippet_url(project_snippet)).to eq("#{Settings.gitlab['url']}/#{project_snippet.project.full_path}/snippets/#{project_snippet.id}")
       end
@@ -141,6 +159,10 @@ describe GitlabRoutingHelper do
     describe '#raw_snippet_path' do
       it 'returns the raw personal snippet path' do
         expect(raw_snippet_path(personal_snippet)).to eq("/snippets/#{personal_snippet.id}/raw")
+      end
+
+      it 'returns the raw path with token for secret snippets' do
+        expect(raw_snippet_path(secret_snippet)).to eq("/snippets/#{secret_snippet.id}/raw?token=#{secret_snippet.secret_token}")
       end
 
       it 'returns the raw project snippet path' do
@@ -153,6 +175,10 @@ describe GitlabRoutingHelper do
         expect(raw_snippet_url(personal_snippet)).to eq("#{Settings.gitlab['url']}/snippets/#{personal_snippet.id}/raw")
       end
 
+      it 'returns the raw url with token for secret snippets' do
+        expect(raw_snippet_url(secret_snippet)).to eq("#{Settings.gitlab['url']}/snippets/#{secret_snippet.id}/raw?token=#{secret_snippet.secret_token}")
+      end
+
       it 'returns the raw project snippet url' do
         expect(raw_snippet_url(project_snippet)).to eq("#{Settings.gitlab['url']}/#{project_snippet.project.full_path}/snippets/#{project_snippet.id}/raw")
       end
@@ -162,11 +188,19 @@ describe GitlabRoutingHelper do
       it 'returns the notes path for the personal snippet' do
         expect(snippet_notes_path(personal_snippet)).to eq("/snippets/#{personal_snippet.id}/notes")
       end
+
+      it 'returns the notes path with token for secret snippets' do
+        expect(snippet_notes_path(secret_snippet)).to eq("/snippets/#{secret_snippet.id}/notes?token=#{secret_snippet.secret_token}")
+      end
     end
 
     describe '#snippet_notes_url' do
       it 'returns the notes url for the personal snippet' do
         expect(snippet_notes_url(personal_snippet)).to eq("#{Settings.gitlab['url']}/snippets/#{personal_snippet.id}/notes")
+      end
+
+      it 'returns the notes url with token for secret snippets' do
+        expect(snippet_notes_url(secret_snippet)).to eq("#{Settings.gitlab['url']}/snippets/#{secret_snippet.id}/notes?token=#{secret_snippet.secret_token}")
       end
     end
 
@@ -174,11 +208,19 @@ describe GitlabRoutingHelper do
       it 'returns the note path for the personal snippet' do
         expect(snippet_note_path(personal_snippet, note)).to eq("/snippets/#{personal_snippet.id}/notes/#{note.id}")
       end
+
+      it 'returns the note path with token for secret snippets' do
+        expect(snippet_note_path(secret_snippet, secret_note)).to eq("/snippets/#{secret_snippet.id}/notes/#{secret_note.id}?token=#{secret_snippet.secret_token}")
+      end
     end
 
     describe '#snippet_note_url' do
       it 'returns the note url for the personal snippet' do
         expect(snippet_note_url(personal_snippet, note)).to eq("#{Settings.gitlab['url']}/snippets/#{personal_snippet.id}/notes/#{note.id}")
+      end
+
+      it 'returns the note url with token for secret snippets' do
+        expect(snippet_note_url(secret_snippet, secret_note)).to eq("#{Settings.gitlab['url']}/snippets/#{secret_snippet.id}/notes/#{secret_note.id}?token=#{secret_snippet.secret_token}")
       end
     end
 
@@ -186,11 +228,19 @@ describe GitlabRoutingHelper do
       it 'returns the note award emoji path for the personal snippet' do
         expect(toggle_award_emoji_snippet_note_path(personal_snippet, note)).to eq("/snippets/#{personal_snippet.id}/notes/#{note.id}/toggle_award_emoji")
       end
+
+      it 'returns the note award emoji path with token for secret snippets' do
+        expect(toggle_award_emoji_snippet_note_path(secret_snippet, secret_note)).to eq("/snippets/#{secret_snippet.id}/notes/#{secret_note.id}/toggle_award_emoji?token=#{secret_snippet.secret_token}")
+      end
     end
 
     describe '#toggle_award_emoji_snippet_note_url' do
       it 'returns the note award emoji url for the personal snippet' do
         expect(toggle_award_emoji_snippet_note_url(personal_snippet, note)).to eq("#{Settings.gitlab['url']}/snippets/#{personal_snippet.id}/notes/#{note.id}/toggle_award_emoji")
+      end
+
+      it 'returns the note award emoji url with token for secret snippets' do
+        expect(toggle_award_emoji_snippet_note_url(secret_snippet, secret_note)).to eq("#{Settings.gitlab['url']}/snippets/#{secret_snippet.id}/notes/#{secret_note.id}/toggle_award_emoji?token=#{secret_snippet.secret_token}")
       end
     end
 
@@ -198,11 +248,19 @@ describe GitlabRoutingHelper do
       it 'returns the award emoji path for the personal snippet' do
         expect(toggle_award_emoji_snippet_path(personal_snippet)).to eq("/snippets/#{personal_snippet.id}/toggle_award_emoji")
       end
+
+      it 'returns the award emoji path with token for secret snippets' do
+        expect(toggle_award_emoji_snippet_path(secret_snippet)).to eq("/snippets/#{secret_snippet.id}/toggle_award_emoji?token=#{secret_snippet.secret_token}")
+      end
     end
 
     describe '#toggle_award_emoji_snippet_url' do
       it 'returns the award url for the personal snippet' do
         expect(toggle_award_emoji_snippet_url(personal_snippet)).to eq("#{Settings.gitlab['url']}/snippets/#{personal_snippet.id}/toggle_award_emoji")
+      end
+
+      it 'returns the award emoji url with token for secret snippets' do
+        expect(toggle_award_emoji_snippet_url(secret_snippet)).to eq("#{Settings.gitlab['url']}/snippets/#{secret_snippet.id}/toggle_award_emoji?token=#{secret_snippet.secret_token}")
       end
     end
   end
