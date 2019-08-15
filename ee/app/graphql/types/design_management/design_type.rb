@@ -7,32 +7,19 @@ module Types
 
       authorize :read_design
 
-      implements(Types::Notes::NoteableType)
-
       alias_method :design, :object
 
       field :id, GraphQL::ID_TYPE, null: false # rubocop:disable Graphql/Descriptions
       field :project, Types::ProjectType, null: false # rubocop:disable Graphql/Descriptions
       field :issue, Types::IssueType, null: false # rubocop:disable Graphql/Descriptions
+      implements(Types::Notes::NoteableType)
+      implements(Types::DesignManagement::DesignFields)
+
       field :notes_count,
             GraphQL::INT_TYPE,
             null: false,
             method: :user_notes_count,
             description: 'The total count of user-created notes for this design'
-      field :filename, GraphQL::STRING_TYPE, null: false # rubocop:disable Graphql/Descriptions
-      field :full_path, GraphQL::STRING_TYPE, null: false # rubocop:disable Graphql/Descriptions
-      field :event,
-            Types::DesignManagement::DesignVersionEventEnum,
-            null: false,
-            description: 'The change that happened to the design at this version',
-            extras: [:parent]
-      field :image, GraphQL::STRING_TYPE, null: false, extras: [:parent] # rubocop:disable Graphql/Descriptions
-      field :diff_refs, Types::DiffRefsType, null: false, calls_gitaly: true # rubocop:disable Graphql/Descriptions
-      field :versions,
-            Types::DesignManagement::VersionType.connection_type,
-            resolver: Resolvers::DesignManagement::VersionResolver,
-            description: 'All versions related to this design ordered newest first',
-            extras: [:parent]
 
       def image(parent:)
         sha = cached_stateful_version(parent).sha

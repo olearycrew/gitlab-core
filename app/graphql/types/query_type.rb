@@ -14,11 +14,6 @@ module Types
           resolver: Resolvers::GroupResolver,
           description: "Find a group"
 
-    field :current_user, Types::UserType,
-          null: true,
-          resolve: -> (_obj, _args, context) { context[:current_user] },
-          description: "Get information about current user"
-
     field :namespace, Types::NamespaceType,
           null: true,
           resolver: Resolvers::NamespaceResolver,
@@ -29,6 +24,16 @@ module Types
           resolver: Resolvers::MetadataResolver,
           description: 'Metadata about GitLab'
 
-    field :echo, GraphQL::STRING_TYPE, null: false, resolver: Resolvers::EchoResolver # rubocop:disable Graphql/Descriptions
+    field :echo, GraphQL::STRING_TYPE,
+          null: false,
+          resolver: Resolvers::EchoResolver,
+          description: 'Echo service - use to test API health'
+
+    field :current_user, Types::UserType,
+          null: true,
+          resolve: ->(_obj, _args, ctx) { ctx[:current_user] },
+          description: 'The currently logged in user'
   end
 end
+
+Types::QueryType.prepend_if_ee('EE::Types::QueryType')

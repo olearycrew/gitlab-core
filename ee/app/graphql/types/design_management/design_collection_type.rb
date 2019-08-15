@@ -18,7 +18,7 @@ module Types
       # exposing all designs
       field :versions,
             Types::DesignManagement::VersionType.connection_type,
-            resolver: Resolvers::DesignManagement::VersionResolver,
+            resolver: Resolvers::DesignManagement::VersionsResolver,
             description: "All versions related to all designs ordered newest first"
     end
   end

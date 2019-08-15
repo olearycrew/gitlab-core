@@ -17,6 +17,11 @@ module EE
               deprecation_reason: 'use design_collection'
 
         field :design_collection, ::Types::DesignManagement::DesignCollectionType, null: true # rubocop:disable Graphql/Descriptions
+
+        field :version, ::Types::DesignManagement::VersionType,
+              null: true,
+              resolver: ::Resolvers::DesignManagement::VersionResolver,
+              description: 'Find a version'
       end
     end
   end
