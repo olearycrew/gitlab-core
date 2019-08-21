@@ -369,4 +369,152 @@ describe DesignManagement::Design do
       subject.after_note_changed(build(:note, :system))
     end
   end
+
+  describe '.by_composite_id' do
+    let_it_be(:issue_a) { create(:issue) }
+    let_it_be(:issue_b) { create(:issue) }
+
+    let_it_be(:design_a) { create(:design, issue: issue_a) }
+    let_it_be(:design_b) { create(:design, issue: issue_a) }
+    let_it_be(:design_c) { create(:design, issue: issue_b, filename: design_a.filename) }
+    let_it_be(:design_d) { create(:design, issue: issue_b, filename: design_b.filename) }
+
+    let(:result) { described_class.by_composite_id(ids) }
+
+    def composite_ids(designs)
+      designs.map { |design| { issue_id: design.issue_id, filename: design.filename } }
+    end
+
+    context 'we pass an empty array' do
+      let(:ids) { [] }
+
+      it 'returns a null relation' do
+        expect(result).to be_empty
+      end
+    end
+
+    context 'we pass nil' do
+      let(:ids) { nil }
+
+      it 'returns a null relation' do
+        expect(result).to be_empty
+      end
+    end
+
+    context 'we pass a singleton composite id' do
+      let(:ids) { composite_ids([design_a]).first }
+
+      it 'finds issue_a' do
+        expect(result).to contain_exactly(design_a)
+      end
+    end
+
+    context 'we pass group of ids' do
+      let(:designs) { [design_a, design_b, design_c] }
+      let(:ids) { composite_ids(designs) }
+
+      it 'finds issue_a' do
+        expect(result).to contain_exactly(*designs)
+      end
+    end
+
+    describe 'performance' do
+      it 'is not O(N)' do
+        all_ids = composite_ids([design_a, design_b, design_c, design_d])
+        one_id = all_ids.first
+
+        expect { described_class.by_composite_id(all_ids) }
+          .to issue_same_number_of_queries_as { described_class.by_composite_id(one_id) }
+      end
+    end
+  end
+
+  describe '.for_reference' do
+    let_it_be(:design_a) { create(:design) }
+    let_it_be(:design_b) { create(:design) }
+
+    it 'avoids extra queries when calling to_reference' do
+      designs = described_class.for_reference.where(id: [design_a.id, design_b.id]).to_a
+
+      expect { designs.map(&:to_reference) }.not_to exceed_query_limit(0)
+    end
+  end
+
+  describe '#to_reference' do
+    let(:namespace) { build(:namespace, path: 'sample-namespace') }
+    let(:project)   { build(:project, name: 'sample-project', namespace: namespace) }
+    let(:group)     { create(:group, name: 'Group', path: 'sample-group') }
+    let(:issue)     { build(:issue, iid: 1, project: project) }
+    let(:filename)  { 'homescreen.jpg' }
+    let(:design)    { build(:design, filename: filename, issue: issue, project: project) }
+
+    context 'when nil argument' do
+      let(:reference) { design.to_reference }
+
+      it 'uses the simple format' do
+        expect(reference).to eq "#1[homescreen.jpg]"
+      end
+
+      context 'when the filename contains spaces, hyphens, periods, single-quotes, underscores and colons' do
+        let(:filename) { %q{a complex filename: containing - _ : etc., but still 'simple'.gif} }
+
+        it 'uses the simple format' do
+          expect(reference).to eq "#1[#{filename}]"
+        end
+      end
+
+      context 'when the filename contains HTML angle brackets' do
+        let(:filename) { 'a <em>great</em> filename.jpg' }
+
+        it 'uses Base64 encoding' do
+          expect(reference).to eq "#1[base64:#{Base64.strict_encode64(filename)}]"
+        end
+      end
+
+      context 'when the filename contains quotation marks' do
+        let(:filename) { %q{a "great" filename.jpg} }
+
+        it 'enclosing quotes, with backslash encoding' do
+          expect(reference).to eq %q{#1["a \"great\" filename.jpg"]}
+        end
+      end
+
+      context 'when the filename contains square brackets' do
+        let(:filename) { %q{a [great] filename.jpg} }
+
+        it 'uses enclosing quotes' do
+          expect(reference).to eq %q{#1["a [great] filename.jpg"]}
+        end
+      end
+    end
+
+    context 'when full is true' do
+      it 'returns complete path to the issue' do
+        refs = [
+          design.to_reference(full: true),
+          design.to_reference(project, full: true),
+          design.to_reference(group, full: true)
+        ]
+
+        expect(refs).to all(eq 'sample-namespace/sample-project#1/designs[homescreen.jpg]')
+      end
+    end
+
+    context 'when full is false' do
+      it 'returns complete path to the issue' do
+        refs = [
+          design.to_reference(build(:project), full: false),
+          design.to_reference(group, full: false)
+        ]
+
+        expect(refs).to all(eq 'sample-namespace/sample-project#1[homescreen.jpg]')
+      end
+    end
+
+    context 'when same project argument' do
+      it 'returns bare reference' do
+        expect(design.to_reference(project)).to eq("#1[homescreen.jpg]")
+      end
+    end
+  end
 end

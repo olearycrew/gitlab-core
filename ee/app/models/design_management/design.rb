@@ -24,6 +24,30 @@ module DesignManagement
 
     alias_attribute :title, :filename
 
+    # A design can be uniquely identified by issue_id and filename
+    # Takes one or more sets of composite IDs, expressed as 2-tuple arrays of
+    # `[issue_id, filename]`.
+    #
+    # e.g:
+    #
+    #   by_composite_id([1, 'homescreen.jpg'])
+    #   by_composite_id([]) # returns ActiveRecord::NullRelation
+    #   by_composite_id([ [1, 'homescreen.jpg'], [2, 'homescreen.jpg'], [1, 'menu.png'] ])
+    #
+    scope :by_composite_id, ->(composites) do
+      tuples = Array.wrap(composites).map { |id| [id[:issue_id], id[:filename]] }
+
+      return none if tuples.empty?
+
+      # Uses tuple constraint to get the correct query logic
+      params = (['(?)'] * tuples.size).join(', ')
+      where("(issue_id, filename) IN (#{params})", *tuples) # rubocop:disable GitlabSecurity/SqlInjection
+    end
+
+    # Pre-fetching scope to include the data necessary to construct a
+    # reference using `to_reference`.
+    scope :for_reference, -> { includes(issue: [{ project: [:route, :namespace] }]) }
+
     # Find designs visible at the given version
     #
     # @param version [nil, DesignManagement::Version]:
@@ -82,10 +106,68 @@ module DesignManagement
     #   #123[homescreen.png]
     #   other-project#72[sidebar.jpg]
     #   #38/designs[transition.gif]
+    #   #12["filename with [] in it.jpg"]
     def to_reference(from = nil, full: false)
       infix = full ? '/designs' : ''
+      totally_simple = %r{ \A #{self.class.simple_file_name} \z }x
+      safe_name = if totally_simple.match?(filename)
+                    filename
+                  elsif filename =~ /[<>]/
+                    %Q{base64:#{Base64.strict_encode64(filename)}}
+                  else
+                    escaped = filename.gsub(%r{[\\"]}) { |x| "\\#{x}" }
+                    %Q{"#{escaped}"}
+                  end
 
-      "%s%s[%s]" % [issue.to_reference(from, full: full), infix, filename]
+      "#{issue.to_reference(from, full: full)}#{infix}[#{safe_name}]"
+    end
+
+    def self.reference_pattern
+      @reference_pattern ||= begin
+        # Filenames can be escaped with double quotes to name filenames
+        # that include square brackets, or other special characters
+        %r{
+          #{Issue.reference_pattern}
+          (\/designs)?
+          \[
+            (?<design> #{simple_file_name} | #{quoted_file_name} | #{base_64_encoded_name})
+          \]
+        }x
+      end
+    end
+
+    def self.simple_file_name
+      %r{
+          (?<simple_file_name>
+           ( \w | [_:,'-] | \. | \s )+
+           \.
+           \w+
+          )
+      }x
+    end
+
+    def self.base_64_encoded_name
+      %r{
+          base64:
+          (?<base_64_encoded_name>
+           [A-Za-z0-9+\n]+
+           =?
+          )
+      }x
+    end
+
+    def self.quoted_file_name
+      %r{
+          "
+          (?<escaped_filename>
+            (\\ \\ | \\ " | [^"\\])+
+          )
+          "
+      }x
+    end
+
+    def self.link_reference_pattern
+      nil
     end
 
     def to_ability_name
