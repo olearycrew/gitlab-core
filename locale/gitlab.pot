@@ -6956,6 +6956,9 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
+msgid "Events in %{project_path}"
+msgstr ""
+
 msgid "Events: %{count}"
 msgstr ""
 
@@ -13224,6 +13227,9 @@ msgid "Project '%{project_name}' was successfully created."
 msgstr ""
 
 msgid "Project '%{project_name}' was successfully updated."
+msgstr ""
+
+msgid "Project Audit Events"
 msgstr ""
 
 msgid "Project Badges"
