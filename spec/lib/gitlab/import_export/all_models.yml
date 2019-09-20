@@ -536,6 +536,7 @@ actions:
 - design
 - version
 versions: &version
+- author
 - issue
 - designs
 - actions
