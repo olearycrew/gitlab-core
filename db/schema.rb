@@ -3777,6 +3777,7 @@ ActiveRecord::Schema.define(version: 2019_11_25_140458) do
     t.datetime "spent_at"
     t.index ["issue_id"], name: "index_timelogs_on_issue_id"
     t.index ["merge_request_id"], name: "index_timelogs_on_merge_request_id"
+    t.index ["spent_at"], name: "index_timelogs_on_spent_at", where: "(spent_at IS NOT NULL)"
     t.index ["user_id"], name: "index_timelogs_on_user_id"
   end
 
