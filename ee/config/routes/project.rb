@@ -187,6 +187,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
       resource :dependencies, only: [:show]
       resource :licenses, only: [:show]
+      resource :threat_monitoring, only: [:show], controller: :threat_monitoring
 
       resources :environments, only: [] do
         member do

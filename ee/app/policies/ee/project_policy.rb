@@ -86,6 +86,12 @@ module EE
       end
 
       with_scope :subject
+      condition(:threat_monitoring_disabled) do
+        ::Feature.disabled?(:threat_monitoring) ||
+          !@subject.feature_available?(:threat_monitoring)
+      end
+
+      with_scope :subject
       condition(:feature_flags_disabled) do
         !@subject.feature_available?(:feature_flags)
       end
@@ -154,6 +160,7 @@ module EE
 
       rule { can?(:developer_access) }.policy do
         enable :read_project_security_dashboard
+        enable :read_threat_monitoring
       end
 
       rule { security_dashboard_feature_disabled }.policy do
@@ -165,6 +172,8 @@ module EE
         enable :create_vulnerability
         enable :admin_vulnerability
       end
+
+      rule { threat_monitoring_disabled }.prevent :read_threat_monitoring
 
       rule { can?(:read_project) & (can?(:read_merge_request) | can?(:read_build)) }.enable :read_vulnerability_feedback
 
@@ -208,6 +217,7 @@ module EE
         enable :read_deployment
         enable :read_pages
         enable :read_project_security_dashboard
+        enable :read_threat_monitoring
       end
 
       rule { auditor & can?(:read_project_security_dashboard) }.policy do
