@@ -19,10 +19,8 @@ module Types
             null: false,
             description: "The version this design-at-versions is pinned to"
 
-      def image(_args)
-        project = Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, design.project_id).find
-
-        Gitlab::Routing.url_helpers.project_design_url(project, design, version.sha)
+      def cached_stateful_version(_parent)
+        version
       end
     end
   end
