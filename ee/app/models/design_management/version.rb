@@ -99,7 +99,7 @@ class DesignManagement::Version < ApplicationRecord
 
   def diff_refs
     strong_memoize(:diff_refs) do
-      sha && issue.project.design_repository.commit(sha).diff_refs
+      issue.project.design_repository.commit(sha).try(:diff_refs)
     end
   end
 
