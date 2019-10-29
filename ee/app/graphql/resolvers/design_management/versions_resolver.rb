@@ -20,7 +20,7 @@ module Resolvers
         ::DesignManagement::VersionsFinder.new(
           design_or_collection,
           context[:current_user],
-          earlier_or_equal_to: version
+          earlier_or_equal_to: version.try(:sync)
         ).execute
       end
     end
