@@ -6,6 +6,32 @@ describe "Getting designs related to an issue" do
   include GraphqlHelpers
   include DesignManagementTestHelpers
 
+  class Field
+    include GraphqlHelpers
+
+    attr_reader :name
+
+    def initialize(name, args, subquery)
+      @name, @args, @subquery = name, args, subquery
+    end
+
+    def query
+      "{ #{subquery} }"
+    end
+
+    def subquery
+      query_graphql_field(@name, @args, @subquery.try(:subquery))
+    end
+  end
+
+  class Literal < Field
+    attr_reader :subquery
+
+    def initialize(subquery)
+      @subquery = subquery
+    end
+  end
+
   set(:design) { create(:design, :with_file, versions_count: 1) }
   set(:current_user) { design.project.owner }
   let(:design_query) do
@@ -19,22 +45,29 @@ describe "Getting designs related to an issue" do
     }
     NODE
   end
-  let(:query) do
-    graphql_query_for(
-      "project",
-      { "fullPath" => design.project.full_path },
-      query_graphql_field(
-        "issue",
-        { iid: design.issue.iid },
-        query_graphql_field(
-          "designs", {}, design_query
-        )
-      )
-    )
+
+  let(:project_field) do
+    Field.new('project',
+              { fullPath: design.project.full_path },
+              issue_field)
   end
+
+  let(:issue_field) do
+    Field.new('issue',
+              { iid: design.issue.iid },
+              designs_field)
+  end
+
+  let(:designs_field) do
+    Field.new('designCollection', {}, Literal.new(design_query))
+  end
+
+  let(:query) { project_field.query }
+
   let(:design_collection) do
-    graphql_data["project"]["issue"]["designs"]
+    graphql_data[project_field.name][issue_field.name][designs_field.name]
   end
+
   let(:design_response) do
     design_collection["designs"]["edges"].first["node"]
   end
