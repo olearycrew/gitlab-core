@@ -98,7 +98,7 @@ module Clusters
       private
 
       def disable_prometheus_integration
-        cluster.projects.each do |project|
+        projects.each do |project|
           project.prometheus_service&.update!(active: false)
         end
       end
