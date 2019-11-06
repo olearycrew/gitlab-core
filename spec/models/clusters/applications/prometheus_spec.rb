@@ -52,12 +52,12 @@ describe Clusters::Applications::Prometheus do
       let(:prometheus_service) { double('prometheus_service') }
 
       subject { create(:clusters_applications_prometheus, :installing, cluster: cluster) }
-  
+
       before do
         allow(cluster).to receive(:groups_projects).and_return [project]
         allow(project).to receive(:find_or_initialize_service).with('prometheus').and_return prometheus_service
       end
-      
+
       it 'ensures Prometheus service is activated' do
         expect(prometheus_service).to receive(:update!).with(active: true)
 
@@ -75,10 +75,10 @@ describe Clusters::Applications::Prometheus do
       before do
         allow(project).to receive(:find_or_initialize_service).with('prometheus').and_return prometheus_service
       end
-      
+
       it 'ensures Prometheus service is activated' do
         expect(prometheus_service).to receive(:update!).with(active: true)
-      
+
         subject.make_installed
       end
     end
