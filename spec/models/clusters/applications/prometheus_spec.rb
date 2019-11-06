@@ -27,20 +27,42 @@ describe Clusters::Applications::Prometheus do
   end
 
   describe 'transition to installed' do
-    let(:project) { create(:project) }
-    let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
-    let(:prometheus_service) { double('prometheus_service') }
+    context 'cluster type  is group' do
+      set(:group) { create(:group) }
+      set(:project) { create(:project, group: group) }
+      let(:cluster) { create(:cluster_for_group, :with_installed_helm, groups: [group]) }
+      let(:prometheus_service) { double('prometheus_service') }
 
-    subject { create(:clusters_applications_prometheus, :installing, cluster: cluster) }
+      subject { create(:clusters_applications_prometheus, :installing, cluster: cluster) }
+  
+      before do
+        allow(cluster).to receive(:groups_projects).and_return [project]
+        allow(project).to receive(:find_or_initialize_service).with('prometheus').and_return prometheus_service
+      end
+      
+      it 'ensures Prometheus service is activated' do
+        expect(prometheus_service).to receive(:update!).with(active: true)
 
-    before do
-      allow(project).to receive(:find_or_initialize_service).with('prometheus').and_return prometheus_service
+        subject.make_installed
+      end
     end
 
-    it 'ensures Prometheus service is activated' do
-      expect(prometheus_service).to receive(:update!).with(active: true)
+    context 'cluster type  is project' do
+      let(:project) { create(:project) }
+      let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
+      let(:prometheus_service) { double('prometheus_service') }
 
-      subject.make_installed
+      subject { create(:clusters_applications_prometheus, :installing, cluster: cluster) }
+
+      before do
+        allow(project).to receive(:find_or_initialize_service).with('prometheus').and_return prometheus_service
+      end
+      
+      it 'ensures Prometheus service is activated' do
+        expect(prometheus_service).to receive(:update!).with(active: true)
+      
+        subject.make_installed
+      end
     end
   end
 

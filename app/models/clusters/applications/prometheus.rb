@@ -20,7 +20,7 @@ module Clusters
 
       state_machine :status do
         after_transition any => [:installed] do |application|
-          application.cluster.projects.each do |project|
+          application.projects.each do |project|
             project.find_or_initialize_service('prometheus').update!(active: true)
           end
         end
@@ -89,6 +89,10 @@ module Clusters
         # `proxy_url` could raise an exception because gitlab can not communicate with the cluster.
         # Since `PrometheusAdapter#can_query?` is eargely loaded on environement pages in gitlab,
         # we need to silence the exceptions
+      end
+
+      def projects
+        cluster.project_type? ? cluster.projects : cluster.groups_projects
       end
 
       private
