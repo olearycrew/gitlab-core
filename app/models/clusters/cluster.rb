@@ -32,6 +32,7 @@ module Clusters
 
     has_many :cluster_groups, class_name: 'Clusters::Group'
     has_many :groups, through: :cluster_groups, class_name: '::Group'
+    has_many :groups_projects, through: :groups, source: :projects, class_name: '::Project'
 
     # we force autosave to happen when we save `Cluster` model
     has_one :provider_gcp, class_name: 'Clusters::Providers::Gcp', autosave: true

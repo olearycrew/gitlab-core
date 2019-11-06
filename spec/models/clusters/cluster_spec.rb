@@ -16,6 +16,7 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
   it { is_expected.to have_many(:projects) }
   it { is_expected.to have_many(:cluster_groups) }
   it { is_expected.to have_many(:groups) }
+  it { is_expected.to have_many(:groups_projects) }
   it { is_expected.to have_one(:provider_gcp) }
   it { is_expected.to have_one(:provider_aws) }
   it { is_expected.to have_one(:platform_kubernetes) }
