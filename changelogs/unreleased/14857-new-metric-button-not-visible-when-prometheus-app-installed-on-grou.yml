@@ -1,0 +1,6 @@
+---
+title: Fixes missing Prometheus service integration for Prometheus managed application
+  deployed to group shared cluster
+merge_request:
+author:
+type: fixed
