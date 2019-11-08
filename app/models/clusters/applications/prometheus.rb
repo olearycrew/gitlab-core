@@ -13,6 +13,7 @@ module Clusters
       include ::Clusters::Concerns::ApplicationStatus
       include ::Clusters::Concerns::ApplicationVersion
       include ::Clusters::Concerns::ApplicationData
+      include AfterCommitQueue
 
       default_value_for :version, VERSION
 
@@ -20,8 +21,8 @@ module Clusters
 
       state_machine :status do
         after_transition any => [:installed] do |application|
-          application.projects.each do |project|
-            project.find_or_initialize_service('prometheus').update!(active: true)
+          application.run_after_commit do
+            Clusters::Applications::PrometheusPostInstallationWorker.perform_async(application.name, application.id)
           end
         end
       end
@@ -92,7 +93,11 @@ module Clusters
       end
 
       def projects
-        cluster.project_type? ? cluster.projects : cluster.groups_projects
+        return cluster.projects if cluster.project_type?
+
+        return cluster.groups_projects if cluster.group_type?
+
+        ::Project.left_joins(:prometheus_service).where("services.active IS NULL OR services.active = FALSE")
       end
 
       private
