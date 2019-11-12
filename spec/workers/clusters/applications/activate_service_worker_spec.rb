@@ -5,7 +5,7 @@ require 'spec_helper'
 describe Clusters::Applications::ActivateServiceWorker, '#perform' do
   context 'cluster exists' do
     describe 'prometheus service' do
-      let (:service_name) { 'prometheus' }
+      let(:service_name) { 'prometheus' }
       
       before { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
 
