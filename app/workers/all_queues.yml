@@ -48,6 +48,7 @@
 - gcp_cluster:clusters_cleanup_app
 - gcp_cluster:clusters_cleanup_project_namespace
 - gcp_cluster:clusters_cleanup_service_account
+- gcp_cluster:clusters_applications_prometheus_post_installation
 
 - github_import_advance_stage
 - github_importer:github_import_import_diff_note
