@@ -22,7 +22,8 @@ module Clusters
       state_machine :status do
         after_transition any => [:installed] do |application|
           application.run_after_commit do
-            Clusters::Applications::ActivateServiceWorker.perform_async(application.cluster_id, PrometheusService.to_param)
+            Clusters::Applications::ActivateServiceWorker
+            .perform_async(application.cluster_id, PrometheusService.to_param) # rubocop:disable CodeReuse/ServiceClass
           end
         end
       end
@@ -95,9 +96,8 @@ module Clusters
       private
 
       def disable_prometheus_integration
-        projects.each do |project|
-          project.prometheus_service&.update!(active: false)
-        end
+        ::Clusters::Applications::DeactivateServiceWorker
+        .perform_async(cluster_id, ::PrometheusService.to_param) # rubocop:disable CodeReuse/ServiceClass
       end
 
       def kube_client

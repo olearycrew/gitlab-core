@@ -12,34 +12,15 @@ describe Clusters::Applications::Prometheus do
   include_examples 'cluster application initial status specs'
 
   describe 'after_destroy' do
-    context 'cluster type is group' do
-      let(:group) { create(:group) }
-      let(:project) { create(:project, group: group) }
-      let(:cluster) { create(:cluster_for_group, :with_installed_helm, groups: [group]) }
-      let!(:application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
-      let!(:prometheus_service) { project.create_prometheus_service(active: true) }
-
-      it 'deactivates prometheus_service after destroy' do
-        expect do
-          application.destroy!
-
-          prometheus_service.reload
-        end.to change(prometheus_service, :active).from(true).to(false)
-      end
-    end
-
     context 'cluster type is project' do
-      let(:project) { create(:project) }
-      let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
-      let!(:application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
-      let!(:prometheus_service) { project.create_prometheus_service(active: true) }
+      let(:cluster) { create(:cluster, :with_installed_helm) }
+      let(:application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
 
       it 'deactivates prometheus_service after destroy' do
-        expect do
-          application.destroy!
+        expect(Clusters::Applications::DeactivateServiceWorker)
+        .to receive(:perform_async).with(cluster.id, 'prometheus')
 
-          prometheus_service.reload
-        end.to change(prometheus_service, :active).from(true).to(false)
+        application.destroy!
       end
     end
   end
