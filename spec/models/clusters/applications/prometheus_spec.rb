@@ -50,7 +50,7 @@ describe Clusters::Applications::Prometheus do
     let(:application) { create(:clusters_applications_prometheus, :installing, cluster: cluster) }
 
     it 'schedules post installation job' do
-      expect(Clusters::Applications::PrometheusPostInstallationWorker)
+      expect(Clusters::Applications::PrometheusActivateServiceWorker)
         .to receive(:perform_async).with(application.name, application.id)
 
       application.make_installed

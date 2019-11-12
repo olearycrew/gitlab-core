@@ -2,7 +2,7 @@
 
 module Clusters
   module Applications
-    class PrometheusPostInstallationWorker
+    class PrometheusActivateServiceWorker
       include ApplicationWorker
       include ClusterQueue
       include ClusterApplications

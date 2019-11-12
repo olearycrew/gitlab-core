@@ -22,7 +22,7 @@ module Clusters
       state_machine :status do
         after_transition any => [:installed] do |application|
           application.run_after_commit do
-            Clusters::Applications::PrometheusPostInstallationWorker.perform_async(application.name, application.id)
+            Clusters::Applications::PrometheusActivateServiceWorker.perform_async(application.name, application.id)
           end
         end
       end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::PrometheusPostInstallationWorker, '#perform' do
+describe Clusters::Applications::PrometheusActivateServiceWorker, '#perform' do
   let(:app) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
   let(:app_name) { app.name }
   let(:app_id) { app.id }
