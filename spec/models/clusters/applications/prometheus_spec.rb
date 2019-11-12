@@ -13,8 +13,8 @@ describe Clusters::Applications::Prometheus do
 
   describe 'after_destroy' do
     context 'cluster type is group' do
-      set(:group) { create(:group) }
-      set(:project) { create(:project, group: group) }
+      let(:group) { create(:group) }
+      let(:project) { create(:project, group: group) }
       let(:cluster) { create(:cluster_for_group, :with_installed_helm, groups: [group]) }
       let!(:application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
       let!(:prometheus_service) { project.create_prometheus_service(active: true) }
@@ -316,7 +316,7 @@ describe Clusters::Applications::Prometheus do
     end
 
     context 'it belongs to group cluster' do
-      set(:group) { create(:group) }
+      let(:group) { create(:group) }
       let!(:project) { create(:project, group: group) }
       let(:cluster) { create(:cluster_for_group, :with_installed_helm, groups: [group]) }
 
@@ -329,7 +329,7 @@ describe Clusters::Applications::Prometheus do
       let!(:project) { create(:project) }
       let(:cluster) { create(:cluster, :instance) }
 
-      it 'returns project' do
+      it 'returns all cluster\'s projects' do
         expect(application.projects.ids).to match_array [project.id]
       end
     end
