@@ -302,36 +302,4 @@ describe Clusters::Applications::Prometheus do
       end
     end
   end
-
-  describe '#projects' do
-    let(:application) { create(:clusters_applications_prometheus, cluster: cluster) }
-
-    context 'it belongs to project_type cluster' do
-      let(:project) { create(:project) }
-      let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
-
-      it 'returns project' do
-        expect(application.projects).to match_array [project]
-      end
-    end
-
-    context 'it belongs to group cluster' do
-      let(:group) { create(:group) }
-      let!(:project) { create(:project, group: group) }
-      let(:cluster) { create(:cluster_for_group, :with_installed_helm, groups: [group]) }
-
-      it 'returns group projects' do
-        expect(application.projects.ids).to match_array [project.id]
-      end
-    end
-
-    context 'it belongs to instance cluster' do
-      let!(:project) { create(:project) }
-      let(:cluster) { create(:cluster, :instance) }
-
-      it 'returns all cluster\'s projects' do
-        expect(application.projects.ids).to match_array [project.id]
-      end
-    end
-  end
 end

@@ -92,14 +92,6 @@ module Clusters
         # we need to silence the exceptions
       end
 
-      def projects
-        return cluster.projects if cluster.project_type?
-
-        return cluster.groups_projects if cluster.group_type?
-
-        ::Project.left_joins(:prometheus_service).where("services.active IS NULL OR services.active = FALSE")
-      end
-
       private
 
       def disable_prometheus_integration
