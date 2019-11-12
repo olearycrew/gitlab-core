@@ -573,6 +573,36 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
     end
   end
 
+  describe '#all_projects' do
+    context 'cluster_type is project_type' do
+      let(:project) { create(:project) }
+      let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
+
+      it 'returns project' do
+        expect(cluster.all_projects).to match_array [project]
+      end
+    end
+
+    context 'cluster_type is group_type' do
+      let(:group) { create(:group) }
+      let!(:project) { create(:project, group: group) }
+      let(:cluster) { create(:cluster_for_group, :with_installed_helm, groups: [group]) }
+
+      it 'returns group projects' do
+        expect(cluster.all_projects.ids).to match_array [project.id]
+      end
+    end
+
+    context 'cluster_type is instance_type' do
+      let!(:project) { create(:project) }
+      let(:cluster) { create(:cluster, :instance) }
+
+      it 'returns all instance\'s projects' do
+        expect(cluster.all_projects.ids).to match_array [project.id]
+      end
+    end
+  end
+
   describe '#kube_ingress_domain' do
     let(:cluster) { create(:cluster, :provided_by_gcp) }
 

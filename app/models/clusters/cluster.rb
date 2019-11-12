@@ -173,6 +173,14 @@ module Clusters
       end
     end
 
+    def all_projects
+      return projects if project_type?
+
+      return groups_projects if group_type?
+      
+      ::Project.all
+    end
+
     def status_name
       return cleanup_status_name if cleanup_errored?
       return :cleanup_ongoing unless cleanup_not_started?
