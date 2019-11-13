@@ -49,7 +49,7 @@
 - gcp_cluster:clusters_cleanup_project_namespace
 - gcp_cluster:clusters_cleanup_service_account
 - gcp_cluster:clusters_applications_activate_service
-- gcp_cluster:clusters_deapplications_activate_service
+- gcp_cluster:clusters_applications_deactivate_service
 
 - github_import_advance_stage
 - github_importer:github_import_import_diff_note
