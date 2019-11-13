@@ -4984,6 +4984,17 @@ describe Project do
         expect(subject).to contain_exactly(cluster, group_cluster)
       end
     end
+
+    context 'project is hosted on instance with integrated cluster' do
+      let(:group_cluster) { create(:cluster, :group) }
+      let(:instance_cluster) { create(:cluster, :instance) }
+      let(:group) { group_cluster.group }
+      let(:project) { create(:project, group: group) }
+
+      it 'returns clusters for groups of this project' do
+        expect(subject).to contain_exactly(cluster, group_cluster, instance_cluster)
+      end
+    end
   end
 
   describe '#object_pool_params' do

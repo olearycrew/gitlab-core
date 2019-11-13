@@ -1236,8 +1236,9 @@ class Project < ApplicationRecord
 
   def all_clusters
     group_clusters = Clusters::Cluster.joins(:groups).where(cluster_groups: { group_id: ancestors_upto } )
+    instance_clusters = Clusters::Cluster.where(cluster_type: :instance_type)
 
-    Clusters::Cluster.from_union([clusters, group_clusters])
+    Clusters::Cluster.from_union([clusters, group_clusters, instance_clusters])
   end
 
   def items_for(entity)
