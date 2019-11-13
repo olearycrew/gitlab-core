@@ -4991,7 +4991,7 @@ describe Project do
       let(:group) { group_cluster.group }
       let(:project) { create(:project, group: group) }
 
-      it 'returns clusters for groups of this project' do
+      it 'returns all available clusters for this project' do
         expect(subject).to contain_exactly(cluster, group_cluster, instance_cluster)
       end
     end
