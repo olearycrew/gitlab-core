@@ -9,24 +9,36 @@ describe Clusters::Applications::DeactivateServiceWorker, '#perform' do
       let!(:application) { create(:clusters_applications_prometheus, :installed, cluster: cluster) }
       let!(:prometheus_service) { create(:prometheus_service, project: project, manual_configuration: false, active: true) }
 
-      before { application.delete } # prometheus service before save synchronises active stated with application existance.
+      before do
+        application.delete # prometheus service before save synchronises active stated with application existance.
+      end
 
-      context 'cluster type  is group' do
-        set(:group) { create(:group) }
-        set(:project) { create(:project, group: group) }
+      context 'cluster type: group' do
+        let(:group) { create(:group) }
+        let(:project) { create(:project, group: group) }
         let(:cluster) { create(:cluster_for_group, :with_installed_helm, groups: [group]) }
 
-        it 'ensures Prometheus service is activated' do
+        it 'ensures Prometheus service is deactivated' do
           expect { described_class.new.perform(cluster.id, service_name) }
           .to change { prometheus_service.reload.active }.from(true).to(false)
         end
       end
 
-      context 'cluster type  is project' do
+      context 'cluster type: project' do
         let(:project) { create(:project) }
         let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
 
-        it 'ensures Prometheus service is activated' do
+        it 'ensures Prometheus service is deactivated' do
+          expect { described_class.new.perform(cluster.id, service_name) }
+          .to change { prometheus_service.reload.active }.from(true).to(false)
+        end
+      end
+
+      context 'cluster type: instance' do
+        let(:project) { create(:project) }
+        let(:cluster) { create(:cluster, :with_installed_helm, :instance) }
+
+        it 'ensures Prometheus service is deactivated' do
           expect { described_class.new.perform(cluster.id, service_name) }
           .to change { prometheus_service.reload.active }.from(true).to(false)
         end
