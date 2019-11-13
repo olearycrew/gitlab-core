@@ -17,7 +17,11 @@ module Clusters
 
       default_value_for :version, VERSION
 
-      after_destroy :disable_prometheus_integration
+      after_destroy do
+        run_after_commit do
+          disable_prometheus_integration
+        end
+      end
 
       state_machine :status do
         after_transition any => [:installed] do |application|
