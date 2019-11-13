@@ -11,7 +11,7 @@ module Clusters
 
         Clusters::Cluster.find(cluster_id).try do |cluster|
           cluster.all_projects.with_service(service).find_each do |project|
-            project.public_send(service).update!(active: false) # rubocop:disable GitlabSecurity/PublicSend
+            project.public_send(service)&.update!(active: false) # rubocop:disable GitlabSecurity/PublicSend
           end
         end
       end
