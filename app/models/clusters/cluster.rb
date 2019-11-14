@@ -177,7 +177,7 @@ module Clusters
       return projects if project_type?
 
       return groups_projects if group_type?
-      
+
       ::Project.all
     end
 
