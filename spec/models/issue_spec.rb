@@ -853,6 +853,62 @@ describe Issue do
     end
   end
 
+  describe '.by_project_id_and_iid' do
+    let_it_be(:issue_a) { create(:issue) }
+    let_it_be(:issue_b) { create(:issue, iid: issue_a.iid) }
+    let_it_be(:issue_c) { create(:issue, project: issue_a.project) }
+    let_it_be(:issue_d) { create(:issue, project: issue_a.project) }
+
+    let(:result) { described_class.by_project_id_and_iid(ids) }
+
+    def composite_ids(issues)
+      issues.map { |issue| { project_id: issue.project_id, iid: issue.iid } }
+    end
+
+    context 'we pass an empty array' do
+      let(:ids) { [] }
+
+      it 'returns a null relation' do
+        expect(result).to be_empty
+      end
+    end
+
+    context 'we pass nil' do
+      let(:ids) { nil }
+
+      it 'returns a null relation' do
+        expect(result).to be_empty
+      end
+    end
+
+    context 'we pass a singleton composite id' do
+      let(:ids) { { project_id: issue_a.project_id, iid: issue_a.iid } }
+
+      it 'finds issue_a' do
+        expect(result).to contain_exactly(issue_a)
+      end
+    end
+
+    context 'we pass group of ids' do
+      let(:issues) { [issue_a, issue_b, issue_c] }
+      let(:ids) { composite_ids(issues) }
+
+      it 'finds issue_a' do
+        expect(result).to contain_exactly(*issues)
+      end
+    end
+
+    describe 'performance' do
+      it 'is not O(N)' do
+        all_ids = composite_ids([issue_a, issue_b, issue_c, issue_d])
+        one_id = all_ids.first
+
+        expect { described_class.by_project_id_and_iid(all_ids) }
+          .to issue_same_number_of_queries_as { described_class.by_project_id_and_iid(one_id) }
+      end
+    end
+  end
+
   it_behaves_like 'throttled touch' do
     subject { create(:issue, updated_at: 1.hour.ago) }
   end

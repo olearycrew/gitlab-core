@@ -71,6 +71,30 @@ class Issue < ApplicationRecord
 
   ignore_column :state, remove_with: '12.7', remove_after: '2019-12-22'
 
+  # An issue can be uniquely identified by project_id and iid
+  # Takes one or more sets of composite IDs, expressed as hash records of
+  # `{project_id: x, iid: y}`.
+  #
+  # e.g:
+  #
+  #   by_composite_id({project_id: 1, iid: 2})
+  #   by_composite_id([]) # returns ActiveRecord::NullRelation
+  #   by_composite_id([
+  #     {project_id: 1, iid: 1},
+  #     {project_id: 2, iid: 1},
+  #     {project_id: 1, iid: 2}
+  #   ])
+  #
+  scope :by_project_id_and_iid, ->(composites) do
+    tuples = Array.wrap(composites).map { |composite_id| [composite_id[:project_id], composite_id[:iid]] }
+
+    return none if tuples.empty?
+
+    # Uses tuple constraint to get the correct query logic
+    params = (['(?)'] * tuples.size).join(', ')
+    where("(project_id, iid) IN (#{params})", *tuples) # rubocop:disable GitlabSecurity/SqlInjection
+  end
+
   after_commit :expire_etag_cache
   after_save :ensure_metrics, unless: :imported?
 
