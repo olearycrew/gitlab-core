@@ -45,7 +45,7 @@ module Banzai
         text.gsub(pattern) do |match|
           symbol = $~[object_sym]
           if object_class.reference_valid?(symbol)
-            yield match, parse_(symbol), $~[:project], $~[:namespace], $~
+            yield match, parse_symbol(symbol, $~), $~[:project], $~[:namespace], $~
           else
             match
           end
@@ -54,7 +54,7 @@ module Banzai
 
       # Transform a symbol extracted from the text to a meaningful value
       # In most cases these will be integers, so we call #to_i by default
-      def self.parse_symbol(symbol)
+      def self.parse_symbol(symbol, match_data)
         symbol.to_i
       end
 
@@ -104,6 +104,10 @@ module Banzai
         end
       end
 
+      def find_parent(ref)
+        find_for_paths([ref]).first
+      end
+
       def url_for_object_cached(object, parent_object)
         cached_call(:banzai_url_for_object, object, path: [object_class, parent_object.id]) do
           url_for_object(object, parent_object)
@@ -120,6 +124,8 @@ module Banzai
         ref_pattern_anchor = /\A#{ref_pattern}\z/
         link_pattern_start = /\A#{link_pattern}/
         link_pattern_anchor = /\A#{link_pattern}\z/
+
+        warm_up # Hook for any pre-fetching a filter may want to do to avoid N+1 queries
 
         nodes.each do |node|
           if text_node?(node) && ref_pattern
@@ -264,15 +270,26 @@ module Banzai
         text
       end
 
+      def warm_up
+        parent_per_reference
+      end
+
       # Returns a Hash containing all object references (e.g. issue IDs) per the
       # project they belong to.
+      #
+      # e.g.
+      #   references_per_parent = {
+      #     project: {
+      #       'some-path/to-a-project' => Set.new(1,2,3),
+      #       'some-path/to-b-project' => Set.new(1,2),
+      #     }
+      #    }
       def references_per_parent
         @references_per ||= {}
 
         @references_per[parent_type] ||= begin
           refs = Hash.new { |hash, key| hash[key] = Set.new }
-
-          regex = Regexp.union(object_class.reference_pattern, object_class.link_reference_pattern)
+          regex = Regexp.union([object_class.reference_pattern, object_class.link_reference_pattern].compact)
 
           nodes.each do |node|
             node.to_html.scan(regex) do
@@ -282,13 +299,18 @@ module Banzai
                        full_group_path($~[:group])
                      end
 
-              symbol = $~[object_sym]
-              refs[path] << symbol if object_class.reference_valid?(symbol)
+              symbol = symbol_from_match($~)
+              refs[path] << self.class.parse_symbol(symbol, $~) if object_class.reference_valid?(symbol)
             end
           end
 
           refs
         end
+      end
+
+      def symbol_from_match(match)
+        key = object_sym
+        match[key] if match.names.include?(key.to_s)
       end
 
       # Returns a Hash containing referenced projects grouped per their full
@@ -312,35 +334,31 @@ module Banzai
         result = klass.where_full_path_in(paths)
         return result if parent_type == :group
 
-        result.includes(:namespace) if parent_type == :project
+        result.includes(namespace: [:route]) if parent_type == :project
       end
 
       # Returns projects for the given paths.
       def find_for_paths(paths)
-        if Gitlab::SafeRequestStore.active?
-          cache = refs_cache
-          to_query = paths - cache.keys
+        cache = refs_cache
+        to_query = paths - cache.keys
 
-          unless to_query.empty?
-            records = relation_for_paths(to_query)
+        unless to_query.empty?
+          records = relation_for_paths(to_query)
 
-            found = []
-            records.each do |record|
-              ref = record.full_path
-              get_or_set_cache(cache, ref) { record }
-              found << ref
-            end
-
-            not_found = to_query - found
-            not_found.each do |ref|
-              get_or_set_cache(cache, ref) { nil }
-            end
+          found = []
+          records.each do |record|
+            ref = record.full_path
+            get_or_set_cache(cache, ref) { record }
+            found << ref
           end
 
-          cache.slice(*paths).values.compact
-        else
-          relation_for_paths(paths)
+          not_found = to_query - found
+          not_found.each do |ref|
+            get_or_set_cache(cache, ref) { nil }
+          end
         end
+
+        cache.slice(*paths).values.compact
       end
 
       def current_parent_path
@@ -379,7 +397,11 @@ module Banzai
       end
 
       def refs_cache
-        Gitlab::SafeRequestStore["banzai_#{parent_type}_refs".to_sym] ||= {}
+        if Gitlab::SafeRequestStore.active?
+          Gitlab::SafeRequestStore["banzai_#{parent_type}_refs".to_sym] ||= {}
+        else
+          @refs_cache ||= {}
+        end
       end
 
       def parent_type
