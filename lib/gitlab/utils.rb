@@ -130,5 +130,54 @@ module Gitlab
       IPAddr.new(str)
     rescue IPAddr::InvalidAddressError
     end
+
+    # Inverse of `Hash#dig` - sets a value in a Hash
+    # by assigning a deep path of keys, vivifying any intermediate
+    # hashes that are required.
+    #
+    # Useful if you need multi-dimensional hashes.
+    #
+    # e.g:
+    #   hash = {}
+    #   Gitlab::Utils.set_in(hash, %i[a b c], 10)
+    #   expect(hash.dig(:a, :b, :c)).to eq(10)
+    #
+    def set_in(hash, keys, value)
+      if keys.present?
+        keys = keys.dup
+        h = hash
+        last_key = keys.pop
+        keys.each do |k|
+          h = (h[k] ||= {})
+        end
+        h[last_key] = value
+      end
+
+      hash
+    end
+
+    # Similar to Array#index_by, except that it takes an array of
+    # key functions, and indexes by a mult-dimensional key.
+    #
+    # Symbols are promoted to Procs
+    #
+    # e.g:
+    #   h = index_by_multikey(%w[word worm work waste], :first, :size, :last)
+    #   => { 
+    #        'w' => {
+    #          3 => { 'd' => 'word', 'm' => 'worm', 'k' => 'work' },
+    #          5 => { 'e' => 'waste' }
+    #        }
+    #      }
+    #   h.dig('w', 3, 'm') === 'worm'
+    #
+    def index_by_multikey(collection, *key_fns)
+      key_fns = key_fns.map { |k| k.is_a?(Symbol) ? k.to_proc : k }
+
+      collection.each_with_object({}) do |item, hash|
+        key = key_fns.map { |k| k[item] }
+        set_in(hash, key, item)
+      end
+    end
   end
 end

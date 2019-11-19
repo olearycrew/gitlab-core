@@ -4,27 +4,25 @@ module Banzai
   module Filter
     class DesignReferenceFilter < AbstractReferenceFilter
       def find_object(project, ids)
-        m = indexed_issue_ids
-        designs_per_project.dig(project.id, m.dig(project.id, ids[:issue_iid]), ids[:filename])
+        issue = indexed_issues.dig(project.id, ids[:issue_iid])
+
+        designs_per_project.dig(project.id, issue.id, ids[:filename]) if issue.present?
       end
 
       def designs_per_project
         @designs_per_project ||= begin
-          hash = Hash.new { |h, k| h[k] = Hash.new { |hh, kk| hh[kk] = {} } }
-          issue_ids = indexed_issue_ids
+          issues = indexed_issues
 
-          tuples = parent_per_reference.to_a.flat_map do |(path, project)|
+          coords = parent_per_reference.to_a.flat_map do |(path, project)|
             references_per_parent[path].map do |ids|
-              issue_id = issue_ids.dig(project.id, ids[:issue_iid])
-              { issue_id: issue_id, **ids } if issue_id.present?
+              issue = issues.dig(project.id, ids[:issue_iid])
+              { issue_id: issue.id, **ids } if issue.present?
             end.compact
           end
 
-          DesignManagement::Design.for_reference.by_composite_id(tuples).each do |design|
-            hash[design.project_id][design.issue_id][design.filename] = design
-          end
+          designs = DesignManagement::Design.for_reference.by_composite_id(coords)
 
-          hash
+          Gitlab::Utils.index_by_multikey(designs, :project_id, :issue_id, :filename)
         end
       end
 
@@ -35,28 +33,25 @@ module Banzai
       end
 
       # Preload all issues so that we can translate efficiently between iid and id.
-      def indexed_issue_ids
+      def indexed_issues
         @issue_ids_by_iid_and_project_id ||=
           begin
-            tuples = references_per_parent.each_with_object([]) do |(project_path, ids), arr|
+            coords = references_per_parent.each_with_object([]) do |(project_path, ids), arr|
               project = parent_per_reference[project_path]
               next unless project.present?
 
               ids.each { |id| arr << { project_id: project.id, iid: id[:issue_iid] } }
             end
-            hash = Hash.new { |hash, key| hash[key] = {} }
 
-            Issue.by_project_id_and_iid(tuples).select(:project_id, :iid, :id).each do |issue|
-              hash[issue.project_id][issue.iid] = issue.id
-            end
+            issues = Issue.by_project_id_and_iid(coords).select(:project_id, :iid, :id)
 
-            hash
+            Gitlab::Utils.index_by_multikey(issues, :project_id, :iid)
           end
       end
 
       def issue_iids_by_id
-        @issue_iids_by_id ||= indexed_issue_ids.each_with_object({}) do |(_, by_project), iids_by_id|
-          by_project.each {|iid, id| iids_by_id[id] = iid }
+        @issue_iids_by_id ||= indexed_issues.each_with_object({}) do |(_, by_project), iids_by_id|
+          by_project.each {|iid, issue| iids_by_id[issue.id] = iid }
         end
       end
 
