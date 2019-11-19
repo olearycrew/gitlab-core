@@ -7,10 +7,12 @@ module Clusters
       include ClusterQueue
 
       def perform(cluster_id, service)
-        Clusters::Cluster.find(cluster_id).try do |cluster|
-          cluster.all_projects.find_each do |project|
-            project.find_or_initialize_service(service).update!(active: true)
-          end
+        cluster = Clusters::Cluster.find_by(id: cluster_id)
+        return unless cluster
+
+        cluster.all_projects.find_each do |project|
+          project.find_or_initialize_service(service).update!(active: true)
+        end
         end
       end
     end
