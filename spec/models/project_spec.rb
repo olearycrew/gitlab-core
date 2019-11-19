@@ -1367,6 +1367,16 @@ describe Project do
     end
   end
 
+  describe '.with_service' do
+    before do
+      create_list(:prometheus_project, 2)
+    end
+
+    it 'avoid n + 1' do
+      expect { described_class.with_service('prometheus_service').map(&:prometheus_service) }.not_to exceed_query_limit(2)
+    end
+  end
+
   context 'repository storage by default' do
     let(:project) { build(:project) }
 
