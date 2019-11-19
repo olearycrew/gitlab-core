@@ -15,6 +15,7 @@ class Issue < ApplicationRecord
   include ThrottledTouch
   include LabelEventable
   include IgnorableColumns
+  include CompositeId
 
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze
@@ -86,13 +87,7 @@ class Issue < ApplicationRecord
   #   ])
   #
   scope :by_project_id_and_iid, ->(composites) do
-    tuples = Array.wrap(composites).map { |composite_id| [composite_id[:project_id], composite_id[:iid]] }
-
-    return none if tuples.empty?
-
-    # Uses tuple constraint to get the correct query logic
-    params = (['(?)'] * tuples.size).join(', ')
-    where("(project_id, iid) IN (#{params})", *tuples) # rubocop:disable GitlabSecurity/SqlInjection
+    where_composite(%i[project_id iid], composites)
   end
 
   after_commit :expire_etag_cache

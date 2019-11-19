@@ -7,6 +7,7 @@ module DesignManagement
     include Gitlab::FileTypeDetection
     include Gitlab::Utils::StrongMemoize
     include Referable
+    include CompositeId
 
     belongs_to :project, inverse_of: :designs
     belongs_to :issue
@@ -25,23 +26,21 @@ module DesignManagement
     alias_attribute :title, :filename
 
     # A design can be uniquely identified by issue_id and filename
-    # Takes one or more sets of composite IDs, expressed as 2-tuple arrays of
-    # `[issue_id, filename]`.
+    # Takes one or more sets of composite IDs of the form:
+    # `{issue_id: Integer, filename: String}`.
     #
     # e.g:
     #
-    #   by_composite_id([1, 'homescreen.jpg'])
+    #   by_composite_id(issue_id: 1, filename: 'homescreen.jpg')
     #   by_composite_id([]) # returns ActiveRecord::NullRelation
-    #   by_composite_id([ [1, 'homescreen.jpg'], [2, 'homescreen.jpg'], [1, 'menu.png'] ])
+    #   by_composite_id([
+    #     { issue_id: 1, filename: 'homescreen.jpg' },
+    #     { issue_id: 2, filename: 'homescreen.jpg' },
+    #     { issue_id: 1, filename: 'menu.png' }
+    #   ])
     #
     scope :by_composite_id, ->(composites) do
-      tuples = Array.wrap(composites).map { |id| [id[:issue_id], id[:filename]] }
-
-      return none if tuples.empty?
-
-      # Uses tuple constraint to get the correct query logic
-      params = (['(?)'] * tuples.size).join(', ')
-      where("(issue_id, filename) IN (#{params})", *tuples) # rubocop:disable GitlabSecurity/SqlInjection
+      where_composite(%i[issue_id filename], composites)
     end
 
     # Pre-fetching scope to include the data necessary to construct a
