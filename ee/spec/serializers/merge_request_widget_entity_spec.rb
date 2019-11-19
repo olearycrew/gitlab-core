@@ -59,6 +59,26 @@ describe MergeRequestWidgetEntity do
     expect { serializer.represent(merge_request) }.not_to exceed_query_limit(control)
   end
 
+  it 'exposes has_sast_reports' do
+    expect(subject.as_json).to include(:has_sast_reports)
+  end
+
+  it 'exposes has_dependency_scanning_reports' do
+    expect(subject.as_json).to include(:has_dependency_scanning_reports)
+  end
+
+  it 'exposes has_license_management_reports' do
+    expect(subject.as_json).to include(:has_license_management_reports)
+  end
+
+  it 'exposes has_container_scanning_reports' do
+    expect(subject.as_json).to include(:has_container_scanning_reports)
+  end
+
+  it 'exposes has_dast_reports' do
+    expect(subject.as_json).to include(:has_dast_reports)
+  end
+
   describe 'test report artifacts', :request_store do
     using RSpec::Parameterized::TableSyntax
 
