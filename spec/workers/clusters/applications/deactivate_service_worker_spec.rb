@@ -52,7 +52,7 @@ describe Clusters::Applications::DeactivateServiceWorker, '#perform' do
           let(:project) { create(:project) }
           let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
 
-          it 'does not rais errors' do
+          it 'does not raise errors' do
             expect { described_class.new.perform(cluster.id, service_name) }.not_to raise_error
           end
         end
