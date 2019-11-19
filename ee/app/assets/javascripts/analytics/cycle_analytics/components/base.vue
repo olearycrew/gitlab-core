@@ -158,7 +158,7 @@ export default {
     onCreateCustomStage(data) {
       this.createCustomStage(data);
     },
-    onUpdateStage(data) {
+    onUpdateCustomStage(data) {
       this.updateStage(data);
     },
     onRemoveStage(id) {
@@ -266,9 +266,10 @@ export default {
             @selectStage="onStageSelect"
             @editStage="onShowEditStageForm"
             @showAddStageForm="onShowAddStageForm"
-            @submit="onCreateCustomStage"
             @hideStage="onUpdateStage"
             @removeStage="onRemoveStage"
+            @createStage="onCreateCustomStage"
+            @updateStage="onUpdateCustomStage"
           />
         </div>
       </div>
