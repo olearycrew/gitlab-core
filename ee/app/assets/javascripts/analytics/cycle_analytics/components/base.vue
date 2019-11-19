@@ -129,6 +129,7 @@ export default {
       'removeStage',
       'setFeatureFlags',
       'editCustomStage',
+      'updateStage',
     ]),
     onGroupSelect(group) {
       this.setSelectedGroup(group);
@@ -266,7 +267,7 @@ export default {
             @selectStage="onStageSelect"
             @editStage="onShowEditStageForm"
             @showAddStageForm="onShowAddStageForm"
-            @hideStage="onUpdateStage"
+            @hideStage="onUpdateCustomStage"
             @removeStage="onRemoveStage"
             @createStage="onCreateCustomStage"
             @updateStage="onUpdateCustomStage"

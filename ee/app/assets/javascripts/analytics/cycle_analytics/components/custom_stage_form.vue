@@ -15,6 +15,7 @@ import {
 } from '../utils';
 
 const initFields = {
+  id: null,
   name: null,
   startEventIdentifier: null,
   startEventLabelId: null,
@@ -150,10 +151,13 @@ export default {
       this.$emit('cancel');
     },
     handleSave() {
-      this.$emit(
-        this.isEditingCustomStage ? STAGE_ACTIONS.EDIT : STAGE_ACTIONS.CREATE,
-        snakeFields(this.fields),
-      );
+      const data = snakeFields(this.fields);
+      if (this.isEditingCustomStage) {
+        const { id } = this.initialFields;
+        this.$emit(STAGE_ACTIONS.UPDATE, { ...data, id });
+      } else {
+        this.$emit(STAGE_ACTIONS.CREATE, data);
+      }
     },
     handleSelectLabel(key, labelId = null) {
       this.fields[key] = labelId;

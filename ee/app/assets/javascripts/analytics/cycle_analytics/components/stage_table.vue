@@ -92,7 +92,7 @@ export default {
       return currentStageEvents.length && !isLoading && !isEmptyStage;
     },
     customStageFormActive() {
-      return this.isCreatingCustomStage || this.isEditingCustomStage;
+      return this.isCreatingCustomStage;
     },
     stageHeaders() {
       return [
@@ -185,8 +185,8 @@ export default {
             :initial-fields="customStageFormInitData"
             :is-editing-custom-stage="isEditingCustomStage"
             @submit="$emit('submit', $event)"
-            @saveStage="$emit(STAGE_ACTIONS.CREATE, $event)"
-            @updateStage="$emit(STAGE_ACTIONS.UPDATE, $event)"
+            @createStage="$emit($options.STAGE_ACTIONS.CREATE, $event)"
+            @updateStage="$emit($options.STAGE_ACTIONS.UPDATE, $event)"
           />
           <template v-else>
             <stage-event-list

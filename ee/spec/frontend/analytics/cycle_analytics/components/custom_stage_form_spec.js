@@ -12,6 +12,7 @@ import {
 } from '../mock_data';
 
 const initData = {
+  id: 74,
   name: 'Cool stage pre',
   startEventIdentifier: labelStartEvent.identifier,
   startEventLabelId: groupLabels[0].id,
@@ -82,10 +83,6 @@ describe('CustomStageForm', () => {
           expect(el.attributes('disabled')).toBeUndefined();
         }
       });
-    });
-
-    it('does not have a loading icon', () => {
-      expect(wrapper.find(sel.submit).html()).toMatchSnapshot();
     });
 
     describe('Start event', () => {
@@ -399,17 +396,21 @@ describe('CustomStageForm', () => {
           wrapper.destroy();
         });
 
-        it(`emits a ${STAGE_ACTIONS.CREATE} event when clicked`, () => {
+        it(`emits a ${STAGE_ACTIONS.CREATE} event when clicked`, done => {
           let event = findEvent(STAGE_ACTIONS.CREATE);
           expect(event).toBeUndefined();
 
           wrapper.find(sel.submit).trigger('click');
-          event = findEvent(STAGE_ACTIONS.CREATE);
-          expect(event).toBeTruthy();
-          expect(event.length).toEqual(1);
+
+          Vue.nextTick(() => {
+            event = findEvent(STAGE_ACTIONS.CREATE);
+            expect(event).toBeTruthy();
+            expect(event.length).toEqual(1);
+            done();
+          });
         });
 
-        it('`submit` event receives the latest data', () => {
+        it(`${STAGE_ACTIONS.CREATE} event receives the latest data`, () => {
           const startEv = startEvents[startEventIndex];
           const selectedStopEvent = getDropdownOption(wrapper, sel.stopEvent, stopEventIndex);
 
@@ -468,6 +469,7 @@ describe('CustomStageForm', () => {
 
           Vue.nextTick(() => {
             expect(wrapper.vm.fields).toEqual({
+              id: null,
               name: null,
               startEventIdentifier: null,
               startEventLabelId: null,
