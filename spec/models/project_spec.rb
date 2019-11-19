@@ -1373,7 +1373,7 @@ describe Project do
     end
 
     it 'avoid n + 1' do
-      expect { described_class.with_service('prometheus_service').map(&:prometheus_service) }.not_to exceed_query_limit(2)
+      expect { described_class.with_service(:prometheus_service).map(&:prometheus_service) }.not_to exceed_query_limit(1)
     end
   end
 
