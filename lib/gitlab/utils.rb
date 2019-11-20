@@ -163,7 +163,7 @@ module Gitlab
     #
     # e.g:
     #   h = index_by_multikey(%w[word worm work waste], :first, :size, :last)
-    #   => { 
+    #   => {
     #        'w' => {
     #          3 => { 'd' => 'word', 'm' => 'worm', 'k' => 'work' },
     #          5 => { 'e' => 'waste' }
@@ -177,6 +177,32 @@ module Gitlab
       collection.each_with_object({}) do |item, hash|
         key = key_fns.map { |k| k[item] }
         set_in(hash, key, item)
+      end
+    end
+
+    # Create a new hash that allows deep setting of keys
+    #
+    # Be careful when using an AutovivifyingHash - it should only be indexed
+    # using `#dig` to avoid accidentally creating intermediate keys.
+    #
+    # e.g.:
+    #   hash = autovivifying_hash
+    #   hash[:a][:b][:c] = 10
+    #   expect(hash.dig(:a, :b, :c)).to eq(10)
+    #   expect(hash.dig(:a, :x, :c)).to be_nil
+    def autovivifying_hash
+      AutovivifyingHash.new { |h, k| h[k] = autovivifying_hash }
+    end
+
+    # Support class - only calls `[key]` if the key is present, avoiding
+    # any autovivifying behaviour when digging.
+    class AutovivifyingHash < Hash
+      def dig(key, *keys)
+        if has_key?(key)
+          super
+        else
+          nil
+        end
       end
     end
   end

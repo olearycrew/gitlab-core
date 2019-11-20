@@ -4,55 +4,15 @@ module Banzai
   module Filter
     class DesignReferenceFilter < AbstractReferenceFilter
       def find_object(project, ids)
-        issue = indexed_issues.dig(project.id, ids[:issue_iid])
+        issue_id = indexed_issue_ids.dig(project.id, ids[:issue_iid])
 
-        designs_per_project.dig(project.id, issue.id, ids[:filename]) if issue.present?
-      end
-
-      def designs_per_project
-        @designs_per_project ||= begin
-          issues = indexed_issues
-
-          coords = parent_per_reference.to_a.flat_map do |(path, project)|
-            references_per_parent[path].map do |ids|
-              issue = issues.dig(project.id, ids[:issue_iid])
-              { issue_id: issue.id, **ids } if issue.present?
-            end.compact
-          end
-
-          designs = DesignManagement::Design.for_reference.by_composite_id(coords)
-
-          Gitlab::Utils.index_by_multikey(designs, :project_id, :issue_id, :filename)
-        end
+        designs_per_project.dig(project.id, issue_id, ids[:filename])
       end
 
       # We are not using this mechanism. This method is disabled to avoid
       # upstream changes in parent classes that might call it.
       def records_per_parent
         raise NotImplementedError
-      end
-
-      # Preload all issues so that we can translate efficiently between iid and id.
-      def indexed_issues
-        @issue_ids_by_iid_and_project_id ||=
-          begin
-            coords = references_per_parent.each_with_object([]) do |(project_path, ids), arr|
-              project = parent_per_reference[project_path]
-              next unless project.present?
-
-              ids.each { |id| arr << { project_id: project.id, iid: id[:issue_iid] } }
-            end
-
-            issues = Issue.by_project_id_and_iid(coords).select(:project_id, :iid, :id)
-
-            Gitlab::Utils.index_by_multikey(issues, :project_id, :iid)
-          end
-      end
-
-      def issue_iids_by_id
-        @issue_iids_by_id ||= indexed_issues.each_with_object({}) do |(_, by_project), iids_by_id|
-          by_project.each {|iid, issue| iids_by_id[issue.id] = iid }
-        end
       end
 
       def parent_type
@@ -88,6 +48,53 @@ module Banzai
                    end
 
         { filename: filename, issue_iid: match_data[:issue].to_i }
+      end
+
+      private
+
+      def designs_per_project
+        @designs_per_project ||= begin
+          issue_ids = indexed_issue_ids
+
+          coords = parent_per_reference.to_a.flat_map do |(path, project)|
+            references_per_parent[path].map do |ids|
+              issue_id = issue_ids.dig(project.id, ids[:issue_iid])
+              { issue_id: issue_id, **ids } if issue_id.present?
+            end.compact
+          end
+
+          DesignManagement::Design
+            .for_reference.by_composite_id(coords)
+            .each_with_object(Gitlab::Utils.autovivifying_hash) do |design, hash|
+              hash[design.project_id][design.issue_id][design.filename] = design
+            end
+        end
+      end
+
+      # Preload all issues so that we can translate efficiently between iid and id.
+      def indexed_issue_ids
+        @issue_ids_by_iid_and_project_id ||=
+          begin
+            coords = references_per_parent.each_with_object([]) do |(project_path, ids), arr|
+              project = parent_per_reference[project_path]
+              next unless project.present?
+
+              ids.each { |id| arr << { project_id: project.id, iid: id[:issue_iid] } }
+            end
+
+            Issue
+              .by_project_id_and_iid(coords)
+              .select(:project_id, :iid, :id)
+              .each_with_object(Gitlab::Utils.autovivifying_hash) do |issue, hash|
+                hash[issue.project_id][issue.iid] = issue.id
+              end
+          end
+      end
+
+      def issue_iids_by_id
+        @issue_iids_by_id ||= indexed_issue_ids.each_with_object({}) do |(_, by_project), iids_by_id|
+          by_project.each {|iid, issue_id| iids_by_id[issue_id] = iid }
+        end
       end
     end
   end

@@ -307,4 +307,15 @@ describe Gitlab::Utils do
       expect(h).to be_empty
     end
   end
+
+  describe '.autovivifying_hash' do
+    it 'fulfils the promise of the example' do
+      hash = described_class.autovivifying_hash
+
+      hash[:a][:b][:c] = 10
+
+      expect(hash.dig(:a, :b, :c)).to eq(10)
+      expect(hash.dig(:a, :x, :c)).to be_nil
+    end
+  end
 end
