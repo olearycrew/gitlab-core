@@ -305,7 +305,7 @@ The following documentation relates to the DevOps **Configure** stage:
 | Configure Topics                                                                                                                   | Description                                                               |
 |:-----------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------|
 | [Auto DevOps](topics/autodevops/index.md)                                                                                          | Automatically employ a complete DevOps lifecycle.                         |
-| [Create Kubernetes clusters on GKE](user/project/clusters/add_remove_clusters.md#add-new-gke-cluster)                              | Use Google Kubernetes Engine and GitLab.                                  |
+| [Create Kubernetes clusters](user/project/clusters/add_remove_clusters.md#add-new-cluster)                                         | Use Kubernetes and GitLab.                                                |
 | [Executable Runbooks](user/project/clusters/runbooks/index.md)                                                                     | Documented procedures that explain how to carry out particular processes. |
 | [GitLab ChatOps](ci/chatops/README.md)                                                                                             | Interact with CI/CD jobs through chat services.                           |
 | [Installing Applications](user/project/clusters/index.md#installing-applications)                                                  | Deploy Helm, Ingress, and Prometheus on Kubernetes.                       |
@@ -337,6 +337,7 @@ The following documentation relates to the DevOps **Monitor** stage:
 | [Health check](user/admin_area/monitoring/health_check.md)                                      | GitLab provides liveness and readiness probes to indicate service health and reachability to required services.                          |
 | [Prometheus project integration](user/project/integrations/prometheus.md)                       | Configure the Prometheus integration per project and monitor your CI/CD environments.                                                    |
 | [Prometheus metrics](user/project/integrations/prometheus_library/index.md)                     | Let Prometheus collect metrics from various services, like Kubernetes, NGINX, NGINX Ingress controller, HAProxy, and Amazon Cloud Watch. |
+| [Incident management](user/incident_management/index.md)                     | Use GitLab to help you better respond to incidents that may occur in your systems. |
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#overview">

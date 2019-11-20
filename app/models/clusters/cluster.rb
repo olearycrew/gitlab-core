@@ -14,6 +14,7 @@ module Clusters
       Applications::Helm.application_name => Applications::Helm,
       Applications::Ingress.application_name => Applications::Ingress,
       Applications::CertManager.application_name => Applications::CertManager,
+      Applications::Crossplane.application_name => Applications::Crossplane,
       Applications::Prometheus.application_name => Applications::Prometheus,
       Applications::Runner.application_name => Applications::Runner,
       Applications::Jupyter.application_name => Applications::Jupyter,
@@ -22,6 +23,7 @@ module Clusters
     }.freeze
     DEFAULT_ENVIRONMENT = '*'
     KUBE_INGRESS_BASE_DOMAIN = 'KUBE_INGRESS_BASE_DOMAIN'
+    APPLICATIONS_ASSOCIATIONS = APPLICATIONS.values.map(&:association_name).freeze
 
     belongs_to :user
     belongs_to :management_project, class_name: '::Project', optional: true
@@ -48,6 +50,7 @@ module Clusters
     has_one_cluster_application :helm
     has_one_cluster_application :ingress
     has_one_cluster_application :cert_manager
+    has_one_cluster_application :crossplane
     has_one_cluster_application :prometheus
     has_one_cluster_application :runner
     has_one_cluster_application :jupyter
@@ -57,6 +60,7 @@ module Clusters
     has_many :kubernetes_namespaces
 
     accepts_nested_attributes_for :provider_gcp, update_only: true
+    accepts_nested_attributes_for :provider_aws, update_only: true
     accepts_nested_attributes_for :platform_kubernetes, update_only: true
 
     validates :name, cluster_name: true
@@ -74,6 +78,7 @@ module Clusters
     delegate :status, to: :provider, allow_nil: true
     delegate :status_reason, to: :provider, allow_nil: true
     delegate :on_creation?, to: :provider, allow_nil: true
+    delegate :knative_pre_installed?, to: :provider, allow_nil: true
 
     delegate :active?, to: :platform_kubernetes, prefix: true, allow_nil: true
     delegate :rbac?, to: :platform_kubernetes, prefix: true, allow_nil: true
@@ -114,7 +119,7 @@ module Clusters
     scope :aws_installed, -> { aws_provided.joins(:provider_aws).merge(Clusters::Providers::Aws.with_status(:created)) }
 
     scope :managed, -> { where(managed: true) }
-
+    scope :with_persisted_applications, -> { eager_load(*APPLICATIONS_ASSOCIATIONS) }
     scope :default_environment, -> { where(environment_scope: DEFAULT_ENVIRONMENT) }
 
     scope :for_project_namespace, -> (namespace_id) { joins(:projects).where(projects: { namespace_id: namespace_id }) }
@@ -200,9 +205,13 @@ module Clusters
       { connection_status: retrieve_connection_status }
     end
 
+    def persisted_applications
+      APPLICATIONS_ASSOCIATIONS.map(&method(:public_send)).compact
+    end
+
     def applications
-      APPLICATIONS.values.map do |application_class|
-        public_send(application_class.association_name) || public_send("build_#{application_class.association_name}") # rubocop:disable GitlabSecurity/PublicSend
+      APPLICATIONS_ASSOCIATIONS.map do |association_name|
+        public_send(association_name) || public_send("build_#{association_name}") # rubocop:disable GitlabSecurity/PublicSend
       end
     end
 
@@ -265,10 +274,6 @@ module Clusters
 
         variables.append(key: KUBE_INGRESS_BASE_DOMAIN, value: kube_ingress_domain)
       end
-    end
-
-    def knative_pre_installed?
-      provider&.knative_pre_installed?
     end
 
     private

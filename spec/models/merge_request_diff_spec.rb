@@ -98,6 +98,12 @@ describe MergeRequestDiff do
       end
 
       it { is_expected.to contain_exactly(outdated.id, latest.id, closed.id, merged.id, closed_recently.id, merged_recently.id) }
+
+      it 'ignores diffs with 0 files' do
+        MergeRequestDiffFile.where(merge_request_diff_id: [closed_recently.id, merged_recently.id]).delete_all
+
+        is_expected.to contain_exactly(outdated.id, latest.id, closed.id, merged.id)
+      end
     end
 
     context 'external diffs are enabled for outdated diffs' do
@@ -377,6 +383,14 @@ describe MergeRequestDiff do
     it 'returns all commit SHAs using commits from the DB' do
       expect(diff_with_commits.commit_shas).not_to be_empty
       expect(diff_with_commits.commit_shas).to all(match(/\h{40}/))
+    end
+
+    context 'with limit attribute' do
+      it 'returns limited number of shas' do
+        expect(diff_with_commits.commit_shas(limit: 2).size).to eq(2)
+        expect(diff_with_commits.commit_shas(limit: 100).size).to eq(29)
+        expect(diff_with_commits.commit_shas.size).to eq(29)
+      end
     end
   end
 

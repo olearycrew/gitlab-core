@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+# Conan Package Manager Client API
+#
+# These API endpoints are not consumed directly by users, so there is no documentation for the
+# individual endpoints. They are called by the Conan package manager client when users run commands
+# like `conan install` or `conan upload`. The usage of the GitLab Conan repository is documented here:
+# https://docs.gitlab.com/ee/user/packages/conan_repository/#installing-a-package
+#
+# Technical debt: https://gitlab.com/gitlab-org/gitlab/issues/35798
 module API
   class ConanPackages < Grape::API
     helpers ::API::Helpers::PackagesHelpers
@@ -12,7 +20,7 @@ module API
     }.freeze
 
     FILE_NAME_REQUIREMENTS = {
-      file_name: Gitlab::Regex.conan_file_name_regex
+      file_name: API::NO_SLASH_URL_PART_REGEX
     }.freeze
 
     PACKAGE_COMPONENT_REGEX = Gitlab::Regex.conan_recipe_component_regex
@@ -108,26 +116,34 @@ module API
           detail 'This feature was introduced in GitLab 12.5'
         end
         get 'packages/:conan_package_reference/digest' do
-          authorize!(:read_package, project)
-
-          presenter = ConanPackagePresenter.new(recipe, current_user, project)
-
-          render_api_error!("No recipe manifest found", 404) if presenter.package_urls.empty?
-
-          present presenter, with: EE::API::Entities::ConanPackage::ConanPackageManifest
+          present_package_download_urls
         end
 
         desc 'Recipe Digest' do
           detail 'This feature was introduced in GitLab 12.5'
         end
         get 'digest' do
-          authorize!(:read_package, project)
+          present_recipe_download_urls
+        end
 
-          presenter = ConanPackagePresenter.new(recipe, current_user, project)
+        # Get the download urls
+        #
+        # returns the download urls for the existing recipe or package in the registry
+        #
+        # the manifest is a hash of { filename: url }
+        # where the url is the download url for the file
+        desc 'Package Download Urls' do
+          detail 'This feature was introduced in GitLab 12.5'
+        end
+        get 'packages/:conan_package_reference/download_urls' do
+          present_package_download_urls
+        end
 
-          render_api_error!("No recipe manifest found", 404) if presenter.recipe_urls.empty?
-
-          present presenter, with: EE::API::Entities::ConanPackage::ConanRecipeManifest
+        desc 'Recipe Download Urls' do
+          detail 'This feature was introduced in GitLab 12.5'
+        end
+        get 'download_urls' do
+          present_recipe_download_urls
         end
 
         # Get the upload urls
@@ -163,6 +179,15 @@ module API
 
           present upload_urls, with: EE::API::Entities::ConanPackage::ConanUploadUrls
         end
+
+        desc 'Delete Package' do
+          detail 'This feature was introduced in GitLab 12.5'
+        end
+        delete do
+          authorize!(:destroy_package, project)
+
+          package.destroy
+        end
       end
 
       params do
@@ -172,7 +197,7 @@ module API
         requires :package_channel, type: String, regexp: PACKAGE_COMPONENT_REGEX, desc: 'Package channel'
         requires :recipe_revision, type: String, desc: 'Conan Recipe Revision'
       end
-      namespace 'files/:package_name/:package_version/:package_username/:package_channel/:recipe_revision' do
+      namespace 'files/:package_name/:package_version/:package_username/:package_channel/:recipe_revision', requirements: PACKAGE_REQUIREMENTS do
         before do
           authenticate_non_get!
         end
@@ -180,11 +205,13 @@ module API
         params do
           requires :file_name, type: String, desc: 'Package file name'
         end
-        desc 'Download recipe files' do
-          detail 'This feature was introduced in GitLab 12.5'
-        end
-        get 'export/:file_name' do
-          not_found!
+        namespace 'export/:file_name', requirements: FILE_NAME_REQUIREMENTS do
+          desc 'Download recipe files' do
+            detail 'This feature was introduced in GitLab 12.5'
+          end
+          get do
+            download_package_file(:recipe_file)
+          end
         end
 
         params do
@@ -192,11 +219,13 @@ module API
           requires :package_revision, type: String, desc: 'Conan Package Revision'
           requires :file_name, type: String, desc: 'Package file name'
         end
-        desc 'Download package files' do
-          detail 'This feature was introduced in GitLab 12.5'
-        end
-        get 'package/:conan_package_reference/:package_revision/:file_name' do
-          not_found!
+        namespace 'package/:conan_package_reference/:package_revision/:file_name', requirements: FILE_NAME_REQUIREMENTS do
+          desc 'Download package files' do
+            detail 'This feature was introduced in GitLab 12.5'
+          end
+          get do
+            download_package_file(:package_file)
+          end
         end
       end
     end
@@ -204,6 +233,26 @@ module API
     helpers do
       include Gitlab::Utils::StrongMemoize
       include ::API::Helpers::RelatedResourcesHelpers
+
+      def present_package_download_urls
+        authorize!(:read_package, project)
+
+        presenter = ConanPackagePresenter.new(recipe, current_user, project)
+
+        render_api_error!("No recipe manifest found", 404) if presenter.package_urls.empty?
+
+        present presenter, with: EE::API::Entities::ConanPackage::ConanPackageManifest
+      end
+
+      def present_recipe_download_urls
+        authorize!(:read_package, project)
+
+        presenter = ConanPackagePresenter.new(recipe, current_user, project)
+
+        render_api_error!("No recipe manifest found", 404) if presenter.recipe_urls.empty?
+
+        present presenter, with: EE::API::Entities::ConanPackage::ConanRecipeManifest
+      end
 
       def recipe_upload_urls(file_names)
         { upload_urls: Hash[
@@ -258,6 +307,26 @@ module API
           full_path = ::Packages::ConanMetadatum.full_path_from(package_username: params[:package_username])
           Project.find_by_full_path(full_path)
         end
+      end
+
+      def package
+        strong_memoize(:package) do
+          project.packages
+            .with_name(params[:package_name])
+            .with_version(params[:package_version])
+            .with_conan_channel(params[:package_channel])
+            .order_created
+            .last
+        end
+      end
+
+      def download_package_file(file_type)
+        authorize!(:read_package, project)
+
+        package_file = ::Packages::PackageFileFinder
+          .new(package, "#{params[:file_name]}", conan_file_type: file_type).execute!
+
+        present_carrierwave_file!(package_file.file)
       end
 
       def find_personal_access_token

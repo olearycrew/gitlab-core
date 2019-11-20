@@ -5,11 +5,11 @@ require 'pathname'
 module QA
   context 'Secure', :docker do
     describe 'Security Reports in a Merge Request' do
-      let(:total_vuln_count) { 49 }
       let(:sast_vuln_count) { 33 }
       let(:dependency_scan_vuln_count) { 4 }
       let(:container_scan_vuln_count) { 8 }
       let(:dast_vuln_count) { 4 }
+      let(:vuln_name) { "Authentication bypass via incorrect DOM traversal and canonicalization in saml2-js" }
 
       after do
         Service::DockerRun::GitlabRunner.new(@executor).remove!
@@ -70,7 +70,7 @@ module QA
       it 'displays the Security reports in the merge request' do
         Page::MergeRequest::Show.perform do |mergerequest|
           expect(mergerequest).to have_vulnerability_report(timeout: 60)
-          expect(mergerequest).to have_total_vulnerability_count_of(total_vuln_count)
+          expect(mergerequest).to have_vulnerability_count
 
           mergerequest.expand_vulnerability_report
 
@@ -81,11 +81,22 @@ module QA
         end
       end
 
+      it 'can dismiss a vulnerability with a reason' do
+        dismiss_reason = "Vulnerability not applicable"
+
+        Page::MergeRequest::Show.perform do |merge_request|
+          vuln_name = "Authentication bypass via incorrect DOM traversal and canonicalization in saml2-js"
+          expect(merge_request).to have_vulnerability_report(timeout: 60)
+          merge_request.dismiss_vulnerability_with_reason(vuln_name, dismiss_reason)
+          merge_request.click_vulnerability(vuln_name)
+          expect(merge_request).to have_opened_dismissed_vulnerability(dismiss_reason)
+        end
+      end
+
       it 'can create an auto-remediation MR' do
         Page::MergeRequest::Show.perform do |mergerequest|
-          vuln_name = "Authentication bypass via incorrect DOM traversal and canonicalization in saml2-js"
-
           expect(mergerequest).to have_vulnerability_report(timeout: 60)
+          # Context changes as resolve method created new MR
           mergerequest.resolve_vulnerability_with_mr vuln_name
           expect(mergerequest).to have_title vuln_name
         end

@@ -452,40 +452,19 @@ describe Snippet do
     end
   end
 
-  describe '#embeddable?' do
-    context 'project snippet' do
-      [
-        { project: :public,   snippet: :public,   embeddable: true },
-        { project: :internal, snippet: :public,   embeddable: false },
-        { project: :private,  snippet: :public,   embeddable: false },
-        { project: :public,   snippet: :internal, embeddable: false },
-        { project: :internal, snippet: :internal, embeddable: false },
-        { project: :private,  snippet: :internal, embeddable: false },
-        { project: :public,   snippet: :private,  embeddable: false },
-        { project: :internal, snippet: :private,  embeddable: false },
-        { project: :private,  snippet: :private,  embeddable: false }
-      ].each do |combination|
-        it 'only returns true when both project and snippet are public' do
-          project = create(:project, combination[:project])
-          snippet = create(:project_snippet, combination[:snippet], project: project)
+  describe '#to_json' do
+    let(:snippet) { build(:snippet) }
 
-          expect(snippet.embeddable?).to eq(combination[:embeddable])
-        end
-      end
+    it 'excludes secret_token from generated json' do
+      expect(JSON.parse(to_json).keys).not_to include("secret_token")
     end
 
-    context 'personal snippet' do
-      [
-        { snippet: :public,   embeddable: true },
-        { snippet: :internal, embeddable: false },
-        { snippet: :private,  embeddable: false }
-      ].each do |combination|
-        it 'only returns true when snippet is public' do
-          snippet = create(:personal_snippet, combination[:snippet])
+    it 'does not override existing exclude option value' do
+      expect(JSON.parse(to_json(except: [:id])).keys).not_to include("secret_token", "id")
+    end
 
-          expect(snippet.embeddable?).to eq(combination[:embeddable])
-        end
-      end
+    def to_json(params = {})
+      snippet.to_json(params)
     end
   end
 end

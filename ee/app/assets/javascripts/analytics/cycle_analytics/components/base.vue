@@ -9,6 +9,7 @@ import GroupsDropdownFilter from '../../shared/components/groups_dropdown_filter
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import SummaryTable from './summary_table.vue';
 import StageTable from './stage_table.vue';
+import { LAST_ACTIVITY_AT } from '../../shared/constants';
 
 export default {
   name: 'CycleAnalytics',
@@ -46,8 +47,10 @@ export default {
     ...mapState([
       'isLoading',
       'isLoadingStage',
+      'isLoadingChartData',
       'isEmptyStage',
       'isAddingCustomStage',
+      'isSavingCustomStage',
       'selectedGroup',
       'selectedProjectIds',
       'selectedStageId',
@@ -59,6 +62,7 @@ export default {
       'errorCode',
       'startDate',
       'endDate',
+      'tasksByType',
     ]),
     ...mapGetters(['currentStage', 'defaultStage', 'hasNoAccessError', 'currentGroupPath']),
     shouldRenderEmptyState() {
@@ -87,6 +91,7 @@ export default {
       'fetchCustomStageFormData',
       'fetchCycleAnalyticsData',
       'fetchStageData',
+      'fetchGroupStagesAndEvents',
       'setCycleAnalyticsDataEndpoint',
       'setStageDataEndpoint',
       'setSelectedGroup',
@@ -97,6 +102,8 @@ export default {
       'hideCustomStageForm',
       'showCustomStageForm',
       'setDateRange',
+      'createCustomStage',
+      'fetchTasksByTypeData',
     ]),
     onGroupSelect(group) {
       this.setCycleAnalyticsDataEndpoint(group.full_path);
@@ -122,6 +129,9 @@ export default {
       const startDate = getDateInPast(endDate, DEFAULT_DAYS_IN_PAST);
       this.setDateRange({ skipFetch: true, startDate, endDate });
     },
+    onCreateCustomStage(data) {
+      this.createCustomStage(data);
+    },
   },
   groupsQueryParams: {
     min_access_level: featureAccessLevel.EVERYONE,
@@ -129,7 +139,7 @@ export default {
   projectsQueryParams: {
     per_page: PROJECTS_PER_PAGE,
     with_shared: false,
-    order_by: 'last_activity_at',
+    order_by: LAST_ACTIVITY_AT,
   },
 };
 </script>
@@ -209,6 +219,7 @@ export default {
             :is-loading="isLoadingStage"
             :is-empty-stage="isEmptyStage"
             :is-adding-custom-stage="isAddingCustomStage"
+            :is-saving-custom-stage="isSavingCustomStage"
             :current-stage-events="currentStageEvents"
             :custom-stage-form-events="customStageFormEvents"
             :labels="labels"
@@ -217,6 +228,7 @@ export default {
             :can-edit-stages="hasCustomizableCycleAnalytics"
             @selectStage="onStageSelect"
             @showAddStageForm="onShowAddStageForm"
+            @submit="onCreateCustomStage"
           />
         </div>
       </div>

@@ -49,13 +49,14 @@ class MergeRequestDiff < ApplicationRecord
   scope :by_commit_sha, ->(sha) do
     joins(:merge_request_diff_commits).where(merge_request_diff_commits: { sha: sha }).reorder(nil)
   end
+  scope :has_diff_files, -> { where(id: MergeRequestDiffFile.select(:merge_request_diff_id)) }
 
   scope :by_project_id, -> (project_id) do
     joins(:merge_request).where(merge_requests: { target_project_id: project_id })
   end
 
   scope :recent, -> { order(id: :desc).limit(100) }
-  scope :files_in_database, -> { where(stored_externally: [false, nil]) }
+  scope :files_in_database, -> { has_diff_files.where(stored_externally: [false, nil]) }
 
   scope :not_latest_diffs, -> do
     merge_requests = MergeRequest.arel_table
@@ -213,12 +214,14 @@ class MergeRequestDiff < ApplicationRecord
     end
   end
 
-  def commits
-    @commits ||= load_commits
+  def commits(limit: nil)
+    strong_memoize(:"commits_#{limit || 'all'}") do
+      load_commits(limit: limit)
+    end
   end
 
   def last_commit_sha
-    commit_shas.first
+    commit_shas(limit: 1).first
   end
 
   def first_commit
@@ -247,8 +250,8 @@ class MergeRequestDiff < ApplicationRecord
     project.commit_by(oid: head_commit_sha)
   end
 
-  def commit_shas
-    merge_request_diff_commits.map(&:sha)
+  def commit_shas(limit: nil)
+    merge_request_diff_commits.limit(limit).pluck(:sha)
   end
 
   def commits_by_shas(shas)
@@ -529,8 +532,9 @@ class MergeRequestDiff < ApplicationRecord
     end
   end
 
-  def load_commits
-    commits = merge_request_diff_commits.map { |commit| Commit.from_hash(commit.to_hash, project) }
+  def load_commits(limit: nil)
+    commits = merge_request_diff_commits.limit(limit)
+      .map { |commit| Commit.from_hash(commit.to_hash, project) }
 
     CommitCollection
       .new(merge_request.source_project, commits, merge_request.source_branch)

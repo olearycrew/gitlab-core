@@ -1,18 +1,19 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import {
   GlEmptyState,
   GlButton,
   GlLink,
   GlLoadingIcon,
   GlTable,
-  GlSearchBoxByType,
+  GlSearchBoxByClick,
 } from '@gitlab/ui';
+import { visitUrl } from '~/lib/utils/url_utility';
 import Icon from '~/vue_shared/components/icon.vue';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { __ } from '~/locale';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
-import { trackViewInSentryOptions, trackClickErrorLinkToSentryOptions } from '../utils';
+import { trackViewInSentryOptions } from '../utils';
 
 export default {
   fields: [
@@ -27,7 +28,7 @@ export default {
     GlLink,
     GlLoadingIcon,
     GlTable,
-    GlSearchBoxByType,
+    GlSearchBoxByClick,
     Icon,
     TimeAgo,
   },
@@ -62,11 +63,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['errors', 'externalUrl', 'loading']),
-    ...mapGetters(['filterErrorsByTitle']),
-    filteredErrors() {
-      return this.errorSearchQuery ? this.filterErrorsByTitle(this.errorSearchQuery) : this.errors;
-    },
+    ...mapState('list', ['errors', 'externalUrl', 'loading']),
   },
   created() {
     if (this.errorTrackingEnabled) {
@@ -74,9 +71,14 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['startPolling', 'restartPolling']),
+    ...mapActions('list', ['startPolling', 'restartPolling']),
+    filterErrors() {
+      this.startPolling(`${this.indexPath}?search_term=${this.errorSearchQuery}`);
+    },
     trackViewInSentryOptions,
-    trackClickErrorLinkToSentryOptions,
+    viewDetails(errorId) {
+      visitUrl(`error_tracking/${errorId}/details`);
+    },
   },
 };
 </script>
@@ -84,17 +86,15 @@ export default {
 <template>
   <div>
     <div v-if="errorTrackingEnabled">
-      <div v-if="loading" class="py-3">
-        <gl-loading-icon :size="3" />
-      </div>
-      <div v-else>
+      <div>
         <div class="d-flex flex-row justify-content-around bg-secondary border">
-          <gl-search-box-by-type
+          <gl-search-box-by-click
             v-model="errorSearchQuery"
             class="col-lg-10 m-3 p-0"
             :placeholder="__('Search or filter results...')"
             type="search"
             autofocus
+            @submit="filterErrors"
           />
           <gl-button
             v-track-event="trackViewInSentryOptions(externalUrl)"
@@ -108,9 +108,14 @@ export default {
           </gl-button>
         </div>
 
+        <div v-if="loading" class="py-3">
+          <gl-loading-icon size="md" />
+        </div>
+
         <gl-table
+          v-else
           class="mt-3"
-          :items="filteredErrors"
+          :items="errors"
           :fields="$options.fields"
           :show-empty="true"
           fixed
@@ -125,13 +130,11 @@ export default {
           <template slot="error" slot-scope="errors">
             <div class="d-flex flex-column">
               <gl-link
-                v-track-event="trackClickErrorLinkToSentryOptions(errors.item.externalUrl)"
-                :href="errors.item.externalUrl"
                 class="d-flex text-dark"
                 target="_blank"
+                @click="viewDetails(errors.item.id)"
               >
                 <strong class="text-truncate">{{ errors.item.title.trim() }}</strong>
-                <icon name="external-link" class="ml-1 flex-shrink-0" />
               </gl-link>
               <span class="text-secondary text-truncate">
                 {{ errors.item.culprit }}

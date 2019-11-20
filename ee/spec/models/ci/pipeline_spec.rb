@@ -23,9 +23,9 @@ describe Ci::Pipeline do
   end
 
   describe '#with_vulnerabilities scope' do
-    let!(:pipeline_1) { create(:ci_pipeline_without_jobs, project: project) }
-    let!(:pipeline_2) { create(:ci_pipeline_without_jobs, project: project) }
-    let!(:pipeline_3) { create(:ci_pipeline_without_jobs, project: project) }
+    let!(:pipeline_1) { create(:ci_pipeline, project: project) }
+    let!(:pipeline_2) { create(:ci_pipeline, project: project) }
+    let!(:pipeline_3) { create(:ci_pipeline, project: project) }
 
     before do
       create(:vulnerabilities_occurrence, pipelines: [pipeline_1], project: pipeline.project)
@@ -467,27 +467,6 @@ describe Ci::Pipeline do
 
           pipeline.succeed!
         end
-      end
-    end
-  end
-
-  describe '#ci_yaml_file_path' do
-    subject { pipeline.ci_yaml_file_path }
-
-    context 'the source is the repository' do
-      let(:implied_yml) { Gitlab::Template::GitlabCiYmlTemplate.find('Auto-DevOps').content }
-
-      before do
-        pipeline.repository_source!
-      end
-
-      it 'returns the configuration if found' do
-        allow(pipeline.project.repository).to receive(:gitlab_ci_yml_for)
-          .and_return('config')
-
-        expect(pipeline.ci_yaml_file).to be_a(String)
-        expect(pipeline.ci_yaml_file).not_to eq(implied_yml)
-        expect(pipeline.yaml_errors).to be_nil
       end
     end
   end

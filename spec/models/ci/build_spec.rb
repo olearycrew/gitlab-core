@@ -2221,7 +2221,7 @@ describe Ci::Build do
           { key: 'CI_PAGES_URL', value: project.pages_url, public: true, masked: false },
           { key: 'CI_API_V4_URL', value: 'http://localhost/api/v4', public: true, masked: false },
           { key: 'CI_PIPELINE_IID', value: pipeline.iid.to_s, public: true, masked: false },
-          { key: 'CI_CONFIG_PATH', value: pipeline.ci_yaml_file_path, public: true, masked: false },
+          { key: 'CI_CONFIG_PATH', value: pipeline.config_path, public: true, masked: false },
           { key: 'CI_PIPELINE_SOURCE', value: pipeline.source, public: true, masked: false },
           { key: 'CI_COMMIT_MESSAGE', value: pipeline.git_commit_message, public: true, masked: false },
           { key: 'CI_COMMIT_TITLE', value: pipeline.git_commit_title, public: true, masked: false },
@@ -2667,11 +2667,17 @@ describe Ci::Build do
       it { is_expected.to include(deployment_variable) }
     end
 
+    context 'when project has default CI config path' do
+      let(:ci_config_path) { { key: 'CI_CONFIG_PATH', value: '.gitlab-ci.yml', public: true, masked: false } }
+
+      it { is_expected.to include(ci_config_path) }
+    end
+
     context 'when project has custom CI config path' do
       let(:ci_config_path) { { key: 'CI_CONFIG_PATH', value: 'custom', public: true, masked: false } }
 
       before do
-        project.update(ci_config_path: 'custom')
+        expect_any_instance_of(Project).to receive(:ci_config_path) { 'custom' }
       end
 
       it { is_expected.to include(ci_config_path) }
@@ -3080,10 +3086,20 @@ describe Ci::Build do
     rescue StateMachines::InvalidTransition
     end
 
-    it 'ensures pipeline ref existence' do
-      expect(job.pipeline.persistent_ref).to receive(:create).once
+    context 'for pipeline ref existence' do
+      it 'ensures pipeline ref creation' do
+        expect(job.pipeline.persistent_ref).to receive(:create).once
 
-      run_job_without_exception
+        run_job_without_exception
+      end
+
+      it 'ensures that it is not run in database transaction' do
+        expect(job.pipeline.persistent_ref).to receive(:create) do
+          expect(Gitlab::Database).not_to be_inside_transaction
+        end
+
+        run_job_without_exception
+      end
     end
 
     shared_examples 'saves data on transition' do

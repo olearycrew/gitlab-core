@@ -871,7 +871,7 @@ button.mini-pipeline-graph-dropdown-toggle {
         height: $ci-action-dropdown-svg-size;
         fill: $gl-text-color-secondary;
         position: relative;
-        top: 1px;
+        top: auto;
         vertical-align: initial;
       }
     }
@@ -1084,18 +1084,6 @@ button.mini-pipeline-graph-dropdown-toggle {
 }
 
 .test-reports-table {
-  color: $gray-700;
-
-  .test-reports-summary-row {
-    &:hover {
-      background-color: $gray-light;
-
-      .test-reports-summary-suite {
-        text-decoration: underline;
-      }
-    }
-  }
-
   .build-trace {
     @include build-trace();
   }

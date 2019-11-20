@@ -51,7 +51,7 @@ The following table depicts the various user permission levels in a project.
 | View Security reports **(ULTIMATE)**              | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
 | View Dependency list **(ULTIMATE)**               | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | View licenses in Dependency list **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View [Design Management](project/issues/design_management.md) pages **(PREMIUM)** | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
+| View [Design Management](project/issues/design_management.md) pages **(PREMIUM)** | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View project code                                 | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | Pull project code                                 | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | View GitLab Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control-core) | ✓       | ✓          | ✓           | ✓        | ✓      |
@@ -73,7 +73,7 @@ The following table depicts the various user permission levels in a project.
 | See a commit status                               |         | ✓          | ✓           | ✓        | ✓      |
 | See a container registry                          |         | ✓          | ✓           | ✓        | ✓      |
 | See environments                                  |         | ✓          | ✓           | ✓        | ✓      |
-| See a list of merge requests                      | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
+| See a list of merge requests                      |         | ✓          | ✓           | ✓        | ✓      |
 | View project statistics                           |         | ✓          | ✓           | ✓        | ✓      |
 | View Error Tracking list                          |         | ✓          | ✓           | ✓        | ✓      |
 | Pull from [Conan repository](packages/conan_repository/index.md), [Maven repository](packages/maven_repository/index.md), or [NPM registry](packages/npm_registry/index.md) **(PREMIUM)** |         | ✓          | ✓           | ✓        | ✓      |
@@ -83,7 +83,7 @@ The following table depicts the various user permission levels in a project.
 | Push to non-protected branches                    |         |            | ✓           | ✓        | ✓      |
 | Force push to non-protected branches              |         |            | ✓           | ✓        | ✓      |
 | Remove non-protected branches                     |         |            | ✓           | ✓        | ✓      |
-| Create new merge request                          | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
+| Create new merge request                          |         | ✓          | ✓           | ✓        | ✓      |
 | Assign merge requests                             |         |            | ✓           | ✓        | ✓      |
 | Label merge requests                              |         |            | ✓           | ✓        | ✓      |
 | Lock merge request threads                        |         |            | ✓           | ✓        | ✓      |
@@ -103,6 +103,7 @@ The following table depicts the various user permission levels in a project.
 | Apply code change suggestions                     |         |            | ✓           | ✓        | ✓      |
 | Create and edit wiki pages                        |         |            | ✓           | ✓        | ✓      |
 | Rewrite/remove Git tags                           |         |            | ✓           | ✓        | ✓      |
+| Manage Feature Flags **(PREMIUM)**                |         |            | ✓           | ✓        | ✓      |
 | Use environment terminals                         |         |            |             | ✓        | ✓      |
 | Run Web IDE's Interactive Web Terminals **(ULTIMATE ONLY)** |     |      |             | ✓        | ✓      |
 | Add new team members                              |         |            |             | ✓        | ✓      |
@@ -120,6 +121,7 @@ The following table depicts the various user permission levels in a project.
 | Manage GitLab Pages domains and certificates      |         |            |             | ✓        | ✓      |
 | Remove GitLab Pages                               |         |            |             | ✓        | ✓      |
 | Manage clusters                                   |         |            |             | ✓        | ✓      |
+| View Pods logs **(ULTIMATE)**                     |         |            |             | ✓        | ✓      |
 | Manage license policy **(ULTIMATE)**              |         |            |             | ✓        | ✓      |
 | Edit comments (posted by any user)                |         |            |             | ✓        | ✓      |
 | Manage Error Tracking                             |         |            |             | ✓        | ✓      |
@@ -168,7 +170,7 @@ the [documentation on Cycle Analytics permissions](analytics/cycle_analytics.md#
 
 Developers and users with higher permission level can use all
 the functionality of the Issue Board, that is create/delete lists
-and drag issues around. Read though the
+and drag issues around. Read through the
 [documentation on Issue Boards permissions](project/issue_board.md#permissions)
 to learn more.
 

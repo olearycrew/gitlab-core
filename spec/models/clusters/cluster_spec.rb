@@ -30,6 +30,7 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
   it { is_expected.to delegate_method(:status).to(:provider) }
   it { is_expected.to delegate_method(:status_reason).to(:provider) }
   it { is_expected.to delegate_method(:on_creation?).to(:provider) }
+  it { is_expected.to delegate_method(:knative_pre_installed?).to(:provider) }
   it { is_expected.to delegate_method(:active?).to(:platform_kubernetes).with_prefix }
   it { is_expected.to delegate_method(:rbac?).to(:platform_kubernetes).with_prefix }
   it { is_expected.to delegate_method(:available?).to(:application_helm).with_prefix }
@@ -500,6 +501,48 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
     end
   end
 
+  describe '.with_persisted_applications' do
+    let(:cluster) { create(:cluster) }
+    let!(:helm) { create(:clusters_applications_helm, :installed, cluster: cluster) }
+
+    it 'preloads persisted applications' do
+      query_rec = ActiveRecord::QueryRecorder.new do
+        described_class.with_persisted_applications.find_by_id(cluster.id).application_helm
+      end
+
+      expect(query_rec.count).to eq(1)
+    end
+  end
+
+  describe '#persisted_applications' do
+    let(:cluster) { create(:cluster) }
+
+    subject { cluster.persisted_applications }
+
+    context 'when all applications are created' do
+      let!(:helm) { create(:clusters_applications_helm, cluster: cluster) }
+      let!(:ingress) { create(:clusters_applications_ingress, cluster: cluster) }
+      let!(:cert_manager) { create(:clusters_applications_cert_manager, cluster: cluster) }
+      let!(:prometheus) { create(:clusters_applications_prometheus, cluster: cluster) }
+      let!(:runner) { create(:clusters_applications_runner, cluster: cluster) }
+      let!(:jupyter) { create(:clusters_applications_jupyter, cluster: cluster) }
+      let!(:knative) { create(:clusters_applications_knative, cluster: cluster) }
+
+      it 'returns a list of created applications' do
+        is_expected.to contain_exactly(helm, ingress, cert_manager, prometheus, runner, jupyter, knative)
+      end
+    end
+
+    context 'when not all were created' do
+      let!(:helm) { create(:clusters_applications_helm, cluster: cluster) }
+      let!(:ingress) { create(:clusters_applications_ingress, cluster: cluster) }
+
+      it 'returns a list of created applications' do
+        is_expected.to contain_exactly(helm, ingress)
+      end
+    end
+  end
+
   describe '#applications' do
     set(:cluster) { create(:cluster) }
 
@@ -515,6 +558,7 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
       let!(:helm) { create(:clusters_applications_helm, cluster: cluster) }
       let!(:ingress) { create(:clusters_applications_ingress, cluster: cluster) }
       let!(:cert_manager) { create(:clusters_applications_cert_manager, cluster: cluster) }
+      let!(:crossplane) { create(:clusters_applications_crossplane, cluster: cluster) }
       let!(:prometheus) { create(:clusters_applications_prometheus, cluster: cluster) }
       let!(:runner) { create(:clusters_applications_runner, cluster: cluster) }
       let!(:jupyter) { create(:clusters_applications_jupyter, cluster: cluster) }
@@ -522,7 +566,7 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
       let!(:elastic_stack) { create(:clusters_applications_elastic_stack, cluster: cluster) }
 
       it 'returns a list of created applications' do
-        is_expected.to contain_exactly(helm, ingress, cert_manager, prometheus, runner, jupyter, knative, elastic_stack)
+        is_expected.to contain_exactly(helm, ingress, cert_manager, crossplane, prometheus, runner, jupyter, knative, elastic_stack)
       end
     end
   end
@@ -945,28 +989,6 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
           subject
         end
       end
-    end
-  end
-
-  describe '#knative_pre_installed?' do
-    subject { cluster.knative_pre_installed? }
-
-    context 'with a GCP provider without cloud_run' do
-      let(:cluster) { create(:cluster, :provided_by_gcp) }
-
-      it { is_expected.to be_falsey }
-    end
-
-    context 'with a GCP provider with cloud_run' do
-      let(:cluster) { create(:cluster, :provided_by_gcp, :cloud_run_enabled) }
-
-      it { is_expected.to be_truthy }
-    end
-
-    context 'with a user provider' do
-      let(:cluster) { create(:cluster, :provided_by_user) }
-
-      it { is_expected.to be_falsey }
     end
   end
 end

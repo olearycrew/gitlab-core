@@ -135,6 +135,7 @@ The following job parameters can be defined inside a `default:` block:
 - [`before_script`](#before_script-and-after_script)
 - [`after_script`](#before_script-and-after_script)
 - [`cache`](#cache)
+- [`interruptible`](#interruptible)
 
 In the following example, the `ruby:2.5` image is set as the default for all
 jobs except the `rspec 2.6` job, which uses the `ruby:2.6` image:
@@ -998,12 +999,11 @@ docker build:
       when: delayed
       start_in: '3 hours'
     - when: on_success # Otherwise include the job and set to run normally
-
 ```
 
 Additional job configuration may be added to rules in the future. If something
 useful isn't available, please
-[open an issue](https://www.gitlab.com/gitlab-org/gitlab/issues).
+[open an issue](https://gitlab.com/gitlab-org/gitlab/issues).
 
 ### `tags`
 
@@ -1535,6 +1535,50 @@ cache:
     - binaries/
 ```
 
+##### `cache:key:files`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/18986) in GitLab v12.5.
+
+If `cache:key:files` is added, one or two files must be defined with it. The cache `key`
+will be a SHA computed from the most recent commits (one or two) that changed the
+given files. If neither file was changed in any commits, the key will be `default`.
+
+```yaml
+cache:
+  key:
+    files:
+      - Gemfile.lock
+      - package.json
+  paths:
+    - vendor/ruby
+    - node_modules
+```
+
+##### `cache:key:prefix`
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/18986) in GitLab v12.5.
+
+The `prefix` parameter adds extra functionality to `key:files` by allowing the key to
+be composed of the given `prefix` combined with the SHA computed for `cache:key:files`.
+For example, adding a `prefix` of `rspec`, will
+cause keys to look like: `rspec-feef9576d21ee9b6a32e30c5c79d0a0ceb68d1e5`. If neither
+file was changed in any commits, the prefix is added to `default`, so the key in the
+example would be `rspec-default`.
+
+`prefix` follows the same restrictions as `key`, so it can use any of the
+[predefined variables](../variables/README.md). Similarly, the `/` character or the
+equivalent URI-encoded `%2F`, or a value made only of `.` or `%2E`, is not allowed.
+
+```yaml
+cache:
+  key:
+    files:
+      - Gemfile.lock
+    prefix: ${CI_JOB_NAME}
+  paths:
+    - vendor/ruby
+```
+
 #### `cache:untracked`
 
 Set `untracked: true` to cache all files that are untracked in your Git
@@ -2022,8 +2066,6 @@ An error will be shown if you define jobs from the current stage or next ones.
 Defining an empty array will skip downloading any artifacts for that job.
 The status of the previous job is not considered when using `dependencies`, so
 if it failed or it is a manual job that was not run, no error occurs.
-
----
 
 In the following example, we define two jobs with artifacts, `build:osx` and
 `build:linux`. When the `test:osx` is executed, the artifacts from `build:osx`

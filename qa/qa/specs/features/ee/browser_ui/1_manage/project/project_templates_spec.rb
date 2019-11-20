@@ -33,14 +33,10 @@ module QA
           push.files = @files
           push.commit_message = 'Add test files'
         end
-
-        Page::Main::Menu.perform(&:sign_out_if_signed_in)
       end
 
-      context 'built-in' do
+      context 'built-in', :requires_admin do
         before do
-          Page::Main::Menu.perform(&:sign_out_if_signed_in)
-
           Runtime::Browser.visit(:gitlab, Page::Main::Login)
           Page::Main::Login.perform(&:sign_in_using_admin_credentials)
 
@@ -70,14 +66,12 @@ module QA
       end
 
       # Failure issue: https://gitlab.com/gitlab-org/quality/staging/issues/61
-      context 'instance level', :quarantine do
+      context 'instance level', :quarantine, :requires_admin do
         before do
-          Page::Main::Menu.perform(&:sign_out_if_signed_in)
-
           Runtime::Browser.visit(:gitlab, Page::Main::Login)
           Page::Main::Login.perform(&:sign_in_using_admin_credentials)
 
-          Page::Main::Menu.perform(&:click_admin_area)
+          Page::Main::Menu.perform(&:go_to_admin_area)
           Page::Admin::Menu.perform(&:go_to_template_settings)
 
           EE::Page::Admin::Settings::Templates.perform do |templates|
@@ -117,10 +111,6 @@ module QA
 
       context 'group level' do
         before do
-          # Log out if already logged in. This is necessary because
-          # a previous test might have logged in as admin
-          Page::Main::Menu.perform(&:sign_out_if_signed_in)
-
           Runtime::Browser.visit(:gitlab, Page::Main::Login)
           Page::Main::Login.perform(&:sign_in_using_credentials)
 

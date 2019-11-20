@@ -1,3 +1,5 @@
+import { TASKS_BY_TYPE_SUBJECT_ISSUE } from '../constants';
+
 export default () => ({
   endpoints: {
     cycleAnalyticsData: null,
@@ -11,11 +13,13 @@ export default () => ({
 
   isLoading: false,
   isLoadingStage: false,
+  isLoadingChartData: false,
 
   isEmptyStage: false,
   errorCode: null,
 
   isAddingCustomStage: false,
+  isSavingCustomStage: false,
 
   selectedGroup: null,
   selectedProjectIds: [],
@@ -28,4 +32,9 @@ export default () => ({
   labels: [],
 
   customStageFormEvents: [],
+  tasksByType: {
+    subject: TASKS_BY_TYPE_SUBJECT_ISSUE,
+    labelIds: [],
+    data: [],
+  },
 });

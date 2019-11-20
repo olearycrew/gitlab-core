@@ -30,6 +30,8 @@ const createComponent = ({ slots } = {}) => {
   });
 
   return shallowMount(RelatedItemsTreeHeader, {
+    attachToDocument: true,
+    sync: false,
     localVue,
     store,
     slots,
@@ -121,18 +123,25 @@ describe('RelatedItemsTree', () => {
 
       describe('click event', () => {
         let toggleAddItemForm;
+        let setItemInputValue;
 
         beforeEach(() => {
+          setItemInputValue = jasmine.createSpy();
           toggleAddItemForm = jasmine.createSpy();
           wrapper.vm.$store.hotUpdate({
             actions: {
+              setItemInputValue,
               toggleAddItemForm,
             },
           });
         });
 
-        it('dispatches toggleAddItemForm action', () => {
+        it('dispatches setItemInputValue and toggleAddItemForm action', () => {
           findAddIssuesButton().vm.$emit('click');
+
+          expect(setItemInputValue).toHaveBeenCalled();
+
+          expect(setItemInputValue.calls.mostRecent().args[1]).toEqual('');
 
           expect(toggleAddItemForm).toHaveBeenCalled();
 

@@ -17,6 +17,8 @@ describe('Environment', () => {
       environment,
     };
     wrapper = shallowMount(Component, {
+      sync: false,
+      attachToDocument: true,
       localVue,
       propsData,
     });
@@ -94,6 +96,8 @@ describe('Environment', () => {
       },
     };
     wrapper = shallowMount(Component, {
+      sync: false,
+      attachToDocument: true,
       localVue,
       propsData,
     });
@@ -112,10 +116,12 @@ describe('Environment', () => {
       },
     };
     wrapper = shallowMount(Component, {
+      sync: false,
+      attachToDocument: true,
       localVue,
       propsData,
     });
 
-    expect(wrapper.text()).toContain('This environment has no deployments yet.');
+    expect(wrapper.text()).toContain('API');
   });
 });

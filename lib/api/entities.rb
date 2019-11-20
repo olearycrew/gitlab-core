@@ -489,11 +489,11 @@ module API
       end
 
       expose :developers_can_push do |repo_branch, options|
-        options[:project].protected_branches.developers_can?(:push, repo_branch.name)
+        ::ProtectedBranch.developers_can?(:push, repo_branch.name, protected_refs: options[:project].protected_branches)
       end
 
       expose :developers_can_merge do |repo_branch, options|
-        options[:project].protected_branches.developers_can?(:merge, repo_branch.name)
+        ::ProtectedBranch.developers_can?(:merge, repo_branch.name, protected_refs: options[:project].protected_branches)
       end
 
       expose :can_push do |repo_branch, options|
@@ -1254,6 +1254,7 @@ module API
 
         # let's not expose the secret key in a response
         attributes.delete(:asset_proxy_secret_key)
+        attributes.delete(:eks_secret_access_key)
 
         attributes
       end
@@ -1298,7 +1299,9 @@ module API
     class Release < Grape::Entity
       include ::API::Helpers::Presentable
 
-      expose :name
+      expose :name do |release, _|
+        can_download_code? ? release.name : "Release-#{release.id}"
+      end
       expose :tag, as: :tag_name, if: ->(_, _) { can_download_code? }
       expose :description
       expose :description_html do |entity|
@@ -1312,6 +1315,7 @@ module API
       expose :milestones, using: Entities::Milestone, if: -> (release, _) { release.milestones.present? }
       expose :commit_path, expose_nil: false
       expose :tag_path, expose_nil: false
+      expose :evidence_sha, expose_nil: false
       expose :assets do
         expose :assets_count, as: :count do |release, _|
           assets_to_exclude = can_download_code? ? [] : [:sources]
@@ -1321,6 +1325,7 @@ module API
         expose :links, using: Entities::Releases::Link do |release, options|
           release.links.sorted
         end
+        expose :evidence_file_path, expose_nil: false
       end
       expose :_links do
         expose :merge_requests_url, expose_nil: false
@@ -1678,6 +1683,7 @@ module API
       expose :verified?, as: :verified
       expose :verification_code, as: :verification_code
       expose :enabled_until
+      expose :auto_ssl_enabled
 
       expose :certificate,
         as: :certificate_expiration,
@@ -1693,6 +1699,7 @@ module API
       expose :verified?, as: :verified
       expose :verification_code, as: :verification_code
       expose :enabled_until
+      expose :auto_ssl_enabled
 
       expose :certificate,
         if: ->(pages_domain, _) { pages_domain.certificate? },

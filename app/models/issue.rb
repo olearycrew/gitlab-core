@@ -60,11 +60,16 @@ class Issue < ApplicationRecord
   scope :order_closest_future_date, -> { reorder(Arel.sql('CASE WHEN issues.due_date >= CURRENT_DATE THEN 0 ELSE 1 END ASC, ABS(CURRENT_DATE - issues.due_date) ASC')) }
   scope :order_relative_position_asc, -> { reorder(::Gitlab::Database.nulls_last_order('relative_position', 'ASC')) }
 
-  scope :preload_associations, -> { preload(:labels, project: :namespace) }
+  scope :preload_associated_models, -> { preload(:labels, project: :namespace) }
   scope :with_api_entity_associations, -> { preload(:timelogs, :assignees, :author, :notes, :labels, project: [:route, { namespace: :route }] ) }
 
   scope :public_only, -> { where(confidential: false) }
   scope :confidential_only, -> { where(confidential: true) }
+
+  scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
+
+  # Only remove after 2019-12-22 and with %12.7
+  self.ignored_columns += %i[state]
 
   after_commit :expire_etag_cache
   after_save :ensure_metrics, unless: :imported?
@@ -138,8 +143,8 @@ class Issue < ApplicationRecord
   def self.sort_by_attribute(method, excluded_labels: [])
     case method.to_s
     when 'closest_future_date', 'closest_future_date_asc' then order_closest_future_date
-    when 'due_date', 'due_date_asc'                       then order_due_date_asc
-    when 'due_date_desc'                                  then order_due_date_desc
+    when 'due_date', 'due_date_asc'                       then order_due_date_asc.with_order_id_desc
+    when 'due_date_desc'                                  then order_due_date_desc.with_order_id_desc
     when 'relative_position', 'relative_position_asc'     then order_relative_position_asc.with_order_id_desc
     else
       super

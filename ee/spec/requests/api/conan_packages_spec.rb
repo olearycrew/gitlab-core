@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 describe API::ConanPackages do
-  let_it_be(:package) { create(:conan_package) }
+  let(:package) { create(:conan_package) }
   let_it_be(:personal_access_token) { create(:personal_access_token) }
   let_it_be(:user) { personal_access_token.user }
   let(:project) { package.project }
@@ -234,10 +234,45 @@ describe API::ConanPackages do
     end
   end
 
+  shared_examples 'recipe download_urls' do
+    let(:recipe_path) { package.conan_recipe_path }
+
+    it 'returns the download_urls for the recipe files' do
+      expected_response = {
+        'conanfile.py'      => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/export/conanfile.py",
+        'conanmanifest.txt' => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/export/conanmanifest.txt"
+      }
+
+      allow(presenter).to receive(:recipe_urls) { expected_response }
+
+      subject
+
+      expect(json_response).to eq(expected_response)
+    end
+  end
+
+  shared_examples 'package download_urls' do
+    let(:recipe_path) { package.conan_recipe_path }
+
+    it 'returns the download_urls for the package files' do
+      expected_response = {
+        'conaninfo.txt'     => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/package/123456789/0/conaninfo.txt",
+        'conanmanifest.txt' => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/package/123456789/0/conanmanifest.txt",
+        'conan_package.tgz' => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/package/123456789/0/conan_package.tgz"
+      }
+
+      allow(presenter).to receive(:package_urls) { expected_response }
+
+      subject
+
+      expect(json_response).to eq(expected_response)
+    end
+  end
+
   context 'recipe endpoints' do
     let(:jwt) { build_jwt(personal_access_token) }
     let(:headers) { build_auth_headers(jwt.encoded) }
-    let(:package_id) { '123456789' }
+    let(:conan_package_reference) { '123456789' }
     let(:presenter) { double('ConanPackagePresenter') }
 
     before do
@@ -271,10 +306,10 @@ describe API::ConanPackages do
       end
     end
 
-    describe 'GET /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel/packages/:package_id' do
+    describe 'GET /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel/packages/:conan_package_reference' do
       let(:recipe_path) { package.conan_recipe_path }
 
-      subject { get api("/packages/conan/v1/conans/#{recipe_path}/packages/#{package_id}"), headers: headers }
+      subject { get api("/packages/conan/v1/conans/#{recipe_path}/packages/#{conan_package_reference}"), headers: headers }
 
       it_behaves_like 'rejects invalid recipe'
       it_behaves_like 'rejects recipe for invalid project'
@@ -302,48 +337,31 @@ describe API::ConanPackages do
 
       it_behaves_like 'rejects invalid recipe'
       it_behaves_like 'rejects recipe for invalid project'
-
-      context 'with existing package' do
-        let(:recipe_path) { package.conan_recipe_path }
-
-        it 'returns the download urls for each package file' do
-          expected_response = {
-            'conanfile.py'      => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/export/conanfile.py",
-            'conanmanifest.txt' => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/export/conanmanifest.txt"
-          }
-
-          allow(presenter).to receive(:recipe_urls) { expected_response }
-
-          subject
-
-          expect(json_response).to eq(expected_response)
-        end
-      end
+      it_behaves_like 'recipe download_urls'
     end
 
-    describe 'GET /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel/packages/:package_id/digest' do
-      subject { get api("/packages/conan/v1/conans/#{recipe_path}/packages/#{package_id}/digest"), headers: headers }
+    describe 'GET /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel/packages/:conan_package_reference/download_urls' do
+      subject { get api("/packages/conan/v1/conans/#{recipe_path}/packages/#{conan_package_reference}/download_urls"), headers: headers }
 
       it_behaves_like 'rejects invalid recipe'
       it_behaves_like 'rejects recipe for invalid project'
+      it_behaves_like 'package download_urls'
+    end
 
-      context 'with existing package' do
-        let(:recipe_path) { package.conan_recipe_path }
+    describe 'GET /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel/download_urls' do
+      subject { get api("/packages/conan/v1/conans/#{recipe_path}/download_urls"), headers: headers }
 
-        it 'returns the download urls for the files' do
-          expected_response = {
-            'conaninfo.txt'     => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/package/123456789/0/conaninfo.txt",
-            'conanmanifest.txt' => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/package/123456789/0/conanmanifest.txt",
-            'conan_package.tgz' => "#{Settings.gitlab.base_url}/api/v4/packages/conan/v1/files/#{package.conan_recipe_path}/0/package/123456789/0/conan_package.tgz"
-          }
+      it_behaves_like 'rejects invalid recipe'
+      it_behaves_like 'rejects recipe for invalid project'
+      it_behaves_like 'recipe download_urls'
+    end
 
-          allow(presenter).to receive(:package_urls) { expected_response }
+    describe 'GET /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel/packages/:conan_package_reference/digest' do
+      subject { get api("/packages/conan/v1/conans/#{recipe_path}/packages/#{conan_package_reference}/digest"), headers: headers }
 
-          subject
-
-          expect(json_response).to eq(expected_response)
-        end
-      end
+      it_behaves_like 'rejects invalid recipe'
+      it_behaves_like 'rejects recipe for invalid project'
+      it_behaves_like 'package download_urls'
     end
 
     describe 'POST /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel/upload_urls' do
@@ -370,7 +388,7 @@ describe API::ConanPackages do
       end
     end
 
-    describe 'POST /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel/packages/:package_id/upload_urls' do
+    describe 'POST /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel/packages/:conan_package_reference/upload_urls' do
       let(:recipe_path) { package.conan_recipe_path }
 
       let(:params) do
@@ -395,73 +413,137 @@ describe API::ConanPackages do
         expect(response.body).to eq(expected_response.to_json)
       end
     end
+
+    describe 'DELETE /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username/:package_channel' do
+      let(:recipe_path) { package.conan_recipe_path }
+
+      subject { delete api("/packages/conan/v1/conans/#{recipe_path}"), headers: headers}
+
+      it_behaves_like 'rejects invalid recipe'
+
+      it 'returns unauthorized for users without valid permission' do
+        subject
+
+        expect(response).to have_gitlab_http_status(403)
+      end
+
+      context 'with delete permissions' do
+        before do
+          project.add_maintainer(user)
+        end
+
+        it 'deletes a package' do
+          expect { subject }.to change { Packages::Package.count }.from(2).to(1)
+        end
+      end
+    end
   end
 
   context 'file endpoints' do
     let(:jwt) { build_jwt(personal_access_token) }
     let(:headers) { build_auth_headers(jwt.encoded) }
-    let(:package_file_tgz) { package.package_files.find_by(file_type: 'tgz') }
-    let(:metadata) { package_file_tgz.conan_file_metadatum }
+    let(:recipe_path) { package.conan_recipe_path }
 
-    describe 'GET /api/v4/packages/conan/v1/files/:package_name/package_version/:package_username/:package_channel/
-:recipe_revision/export/:file_name' do
-      let(:recipe_path) { package.conan_recipe_path }
+    shared_examples 'denies download with no token' do
+      context 'with no private token' do
+        let(:headers) { {} }
 
-      subject do
-        get api("/packages/conan/v1/files/#{recipe_path}/#{metadata.recipe_revision}/export/#{file_name}"),
-            headers: headers
-      end
-
-      context 'invalid file' do
-        let(:file_name) { 'badfile.txt' }
-
-        it 'returns 404 not found' do
+        it 'returns 400' do
           subject
 
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
-      end
-
-      context 'valid file' do
-        let(:file_name) { package_file_tgz.file_name }
-
-        it 'returns forbidden' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response).to have_gitlab_http_status(401)
         end
       end
     end
 
+    shared_examples 'a public project with packages' do
+      it 'returns the file' do
+        subject
+
+        expect(response).to have_gitlab_http_status(200)
+        expect(response.content_type.to_s).to eq('application/octet-stream')
+      end
+    end
+
+    shared_examples 'an internal project with packages' do
+      before do
+        project.team.truncate
+        project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
+      end
+
+      it_behaves_like 'denies download with no token'
+
+      it 'returns the file' do
+        subject
+
+        expect(response).to have_gitlab_http_status(200)
+        expect(response.content_type.to_s).to eq('application/octet-stream')
+      end
+    end
+
+    shared_examples 'a private project with packages' do
+      before do
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+      end
+
+      it_behaves_like 'denies download with no token'
+
+      it 'returns the file' do
+        subject
+
+        expect(response).to have_gitlab_http_status(200)
+        expect(response.content_type.to_s).to eq('application/octet-stream')
+      end
+
+      it 'denies download when not enough permissions' do
+        project.add_guest(user)
+
+        subject
+
+        expect(response).to have_gitlab_http_status(403)
+      end
+    end
+
+    shared_examples 'a project is not found' do
+      let(:recipe_path) { 'not/package/for/project' }
+
+      it 'returns forbidden' do
+        subject
+
+        expect(response).to have_gitlab_http_status(403)
+      end
+    end
+
     describe 'GET /api/v4/packages/conan/v1/files/:package_name/package_version/:package_username/:package_channel/
-:recipe_revision/package/:conan_package_reference/:package_revision/:file_name' do
-      let(:recipe_path) { package.conan_recipe_path }
+:recipe_revision/export/:file_name' do
+      let(:recipe_file) { package.package_files.find_by(file_name: 'conanfile.py') }
+      let(:metadata) { recipe_file.conan_file_metadatum }
 
       subject do
-        get api("/packages/conan/v1/files/#{recipe_path}/#{metadata.recipe_revision}/package/" \
-              "#{metadata.conan_package_reference}/#{metadata.package_revision}/#{file_name}"),
+        get api("/packages/conan/v1/files/#{recipe_path}/#{metadata.recipe_revision}/export/#{recipe_file.file_name}"),
             headers: headers
       end
 
-      context 'invalid file' do
-        let(:file_name) { 'badfile.txt' }
+      it_behaves_like 'a public project with packages'
+      it_behaves_like 'an internal project with packages'
+      it_behaves_like 'a private project with packages'
+      it_behaves_like 'a project is not found'
+    end
 
-        it 'returns 404 not found' do
-          subject
+    describe 'GET /api/v4/packages/conan/v1/files/:package_name/package_version/:package_username/:package_channel/
+:recipe_revision/package/:conan_package_reference/:package_revision/:file_name' do
+      let(:package_file) { package.package_files.find_by(file_name: 'conaninfo.txt') }
+      let(:metadata) { package_file.conan_file_metadatum }
 
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
+      subject do
+        get api("/packages/conan/v1/files/#{recipe_path}/#{metadata.recipe_revision}/package/#{metadata.conan_package_reference}/#{metadata.package_revision}/#{package_file.file_name}"),
+            headers: headers
       end
 
-      context 'valid file' do
-        let(:file_name) { package_file_tgz.file_name }
-
-        it 'returns forbidden' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
-      end
+      it_behaves_like 'a public project with packages'
+      it_behaves_like 'an internal project with packages'
+      it_behaves_like 'a private project with packages'
+      it_behaves_like 'a project is not found'
     end
   end
 

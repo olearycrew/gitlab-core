@@ -36,10 +36,10 @@ export const extractCurrentDiscussion = (discussions, id) =>
 const deleteDesignsFromStore = (store, query, selectedDesigns) => {
   const data = store.readQuery(query);
 
-  const changedDesigns = data.project.issue.designs.designs.edges.filter(
+  const changedDesigns = data.project.issue.designCollection.designs.edges.filter(
     ({ node }) => !selectedDesigns.includes(node.filename),
   );
-  data.project.issue.designs.designs.edges = [...changedDesigns];
+  data.project.issue.designCollection.designs.edges = [...changedDesigns];
 
   store.writeQuery({
     ...query,
@@ -47,15 +47,22 @@ const deleteDesignsFromStore = (store, query, selectedDesigns) => {
   });
 };
 
+/**
+ * Adds a new version of designs to store
+ *
+ * @param {Object} store
+ * @param {Object} query
+ * @param {Object} version
+ */
 const addNewVersionToStore = (store, query, version) => {
   if (!version) return;
 
   const data = store.readQuery(query);
   const newEdge = { node: version, __typename: 'DesignVersionEdge' };
 
-  data.project.issue.designs.versions.edges = [
+  data.project.issue.designCollection.versions.edges = [
     newEdge,
-    ...data.project.issue.designs.versions.edges,
+    ...data.project.issue.designCollection.versions.edges,
   ];
 
   store.writeQuery({
@@ -64,14 +71,19 @@ const addNewVersionToStore = (store, query, version) => {
   });
 };
 
-export const onDesignDeletionError = e => {
-  createFlash(s__('DesignManagement|We could not delete design(s). Please try again.'));
-  throw e;
-};
+/**
+ * Updates a store after design deletion
+ *
+ * @param {Object} store
+ * @param {Object} data
+ * @param {Object} query
+ * @param {Array} designs
+ */
 
 export const updateStoreAfterDesignsDelete = (store, data, query, designs) => {
   if (data.errors) {
-    onDesignDeletionError(new Error(data.errors));
+    createFlash(s__('DesignManagement|We could not delete design(s). Please try again.'));
+    throw new Error(data.errors);
   } else {
     deleteDesignsFromStore(store, query, designs);
     addNewVersionToStore(store, query, data.version);
@@ -79,3 +91,5 @@ export const updateStoreAfterDesignsDelete = (store, data, query, designs) => {
 };
 
 export const findVersionId = id => id.match('::Version/(.+$)')[1];
+
+export const extractDesign = data => data.project.issue.designCollection.designs.edges[0].node;

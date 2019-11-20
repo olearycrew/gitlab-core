@@ -38,6 +38,10 @@ describe Project do
     it { is_expected.to have_many(:approver_groups).dependent(:destroy) }
     it { is_expected.to have_many(:packages).class_name('Packages::Package') }
     it { is_expected.to have_many(:package_files).class_name('Packages::PackageFile') }
+    it { is_expected.to have_many(:upstream_project_subscriptions) }
+    it { is_expected.to have_many(:upstream_projects) }
+    it { is_expected.to have_many(:downstream_project_subscriptions) }
+    it { is_expected.to have_many(:downstream_projects) }
 
     it { is_expected.to have_one(:github_service) }
     it { is_expected.to have_many(:project_aliases) }
@@ -1378,9 +1382,9 @@ describe Project do
 
   describe '#latest_pipeline_with_security_reports' do
     let(:project) { create(:project) }
-    let!(:pipeline_1) { create(:ci_pipeline_without_jobs, project: project) }
-    let!(:pipeline_2) { create(:ci_pipeline_without_jobs, project: project) }
-    let!(:pipeline_3) { create(:ci_pipeline_without_jobs, project: project) }
+    let!(:pipeline_1) { create(:ci_pipeline, project: project) }
+    let!(:pipeline_2) { create(:ci_pipeline, project: project) }
+    let!(:pipeline_3) { create(:ci_pipeline, project: project) }
 
     subject { project.latest_pipeline_with_security_reports }
 
@@ -1900,27 +1904,29 @@ describe Project do
     end
   end
 
-  describe "#design_management_enabled?" do
+  describe '#design_management_enabled?' do
     let(:project) { build(:project) }
 
-    where(
-      feature_enabled: [false, true],
-      license_enabled: [false, true],
-      lfs_enabled: [false, true]
-    )
+    where(:feature_enabled, :license_enabled, :lfs_enabled, :hashed_storage_enabled, :hash_storage_required, :expectation) do
+      false | false | false | false | false | false
+      true  | false | false | false | false | false
+      true  | true  | false | false | false | false
+      true  | true  | true  | false | false | true
+      true  | true  | true  | false | true  | false
+      true  | true  | true  | true  | false | true
+      true  | true  | true  | true  | true  | true
+    end
 
     with_them do
       before do
         stub_licensed_features(design_management: license_enabled)
-        stub_feature_flags(design_management_flag: feature_enabled)
+        stub_feature_flags(design_management_flag: feature_enabled, design_management_require_hashed_storage: hash_storage_required)
         expect(project).to receive(:lfs_enabled?).and_return(lfs_enabled)
+        allow(project).to receive(:hashed_storage?).with(:repository).and_return(hashed_storage_enabled)
       end
 
-      # Design management is only available if all dependencies are enabled
-      let(:expected) { feature_enabled && license_enabled && lfs_enabled }
-
-      it "knows if design management is available" do
-        expect(project.design_management_enabled?).to be(expected)
+      it do
+        expect(project.design_management_enabled?).to be(expectation)
       end
     end
   end
