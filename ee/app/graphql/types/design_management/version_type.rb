@@ -39,7 +39,6 @@ module Types
         if design_id.present?
           design = GitlabSchema.object_from_id(design_id, expected_type: ::DesignManagement::Design)
           dav = ::DesignManagement::DesignAtVersion.new(design, object)
-          Rails.logger.info("dav.id = #{dav.id}")
           return dav
         elsif gid.present?
           return GitlabSchema.object_from_id(gid, expected_type: ::DesignManagement::DesignAtVersion)
