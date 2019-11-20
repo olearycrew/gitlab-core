@@ -96,15 +96,31 @@ The API can be explored interactively using the [GraphiQL IDE](../index.md#graph
 
 | Name  | Type  | Description |
 | ---   |  ---- | ----------  |
-| `id` | ID! |  |
-| `project` | Project! |  |
-| `issue` | Issue! |  |
+| `id` | ID! | The ID of this design |
+| `project` | Project! | The project the design belongs to |
+| `issue` | Issue! | The issue the design belongs to |
+| `filename` | String! | The filename of the design |
+| `fullPath` | String! | The full path to the design file |
+| `image` | String! | The URL of the image |
+| `diffRefs` | DiffRefs! | The diff refs for this design |
+| `event` | DesignVersionEvent! | How this design was changed in the current version |
 | `notesCount` | Int! | The total count of user-created notes for this design |
-| `filename` | String! |  |
-| `fullPath` | String! |  |
-| `event` | DesignVersionEvent! | The change that happened to the design at this version |
-| `image` | String! |  |
-| `diffRefs` | DiffRefs! |  |
+
+### DesignAtVersion
+
+| Name  | Type  | Description |
+| ---   |  ---- | ----------  |
+| `id` | ID! | The ID of this design |
+| `project` | Project! | The project the design belongs to |
+| `issue` | Issue! | The issue the design belongs to |
+| `filename` | String! | The filename of the design |
+| `fullPath` | String! | The full path to the design file |
+| `image` | String! | The URL of the image |
+| `diffRefs` | DiffRefs! | The diff refs for this design |
+| `event` | DesignVersionEvent! | How this design was changed in the current version |
+| `notesCount` | Int! | The total count of user-created notes for this design |
+| `version` | DesignVersion! | The version this design-at-versions is pinned to |
+| `design` | Design! | The underlying design. |
 
 ### DesignCollection
 
@@ -112,6 +128,9 @@ The API can be explored interactively using the [GraphiQL IDE](../index.md#graph
 | ---   |  ---- | ----------  |
 | `project` | Project! |  |
 | `issue` | Issue! |  |
+| `version` | DesignVersion! | A specific version |
+| `designAtVersion` | DesignAtVersion | Find a design pinned as-of a version |
+| `design` | Design | Find a specific design |
 
 ### DesignManagementDeletePayload
 
@@ -136,6 +155,7 @@ The API can be explored interactively using the [GraphiQL IDE](../index.md#graph
 | ---   |  ---- | ----------  |
 | `id` | ID! |  |
 | `sha` | ID! |  |
+| `designAtVersion` | DesignAtVersion! | All designs on this issue as-of this version |
 
 ### DestroyNotePayload
 
@@ -267,6 +287,7 @@ The API can be explored interactively using the [GraphiQL IDE](../index.md#graph
 | `weight` | Int |  |
 | `designs` | DesignCollection |  |
 | `designCollection` | DesignCollection |  |
+| `version` | DesignVersion | Find a version |
 | `epicIssueId` | ID! |  |
 | `relationPath` | String |  |
 | `id` | ID | The global id of the epic-issue relation |
@@ -361,6 +382,7 @@ The API can be explored interactively using the [GraphiQL IDE](../index.md#graph
 | `weight` | Int |  |
 | `designs` | DesignCollection |  |
 | `designCollection` | DesignCollection |  |
+| `version` | DesignVersion | Find a version |
 
 ### IssuePermissions
 
