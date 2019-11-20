@@ -253,61 +253,6 @@ describe Gitlab::Utils do
     end
   end
 
-  describe '.index_by_multikey' do
-    it 'can construct a multi-dimensional index' do
-      h = described_class.index_by_multikey(%w[word worm work waste], :first, :size, :last)
-      expect(h.dig('w', 4, 'm')).to eq('worm')
-    end
-
-    it 'can use any indexable objects' do
-      hash = { a: 1, b: 2, c: 3 }
-      fn   = ->(sym) { sym.to_s.chr.ord }
-
-      h = described_class.index_by_multikey(%i[a b c], hash, fn)
-
-      expect(h.dig(3, 99)).to eq(:c)
-    end
-  end
-
-  describe '.set_in' do
-    let(:keys) { %i[a b c d] }
-
-    it 'is the inverse of dig' do
-      h = described_class.set_in({}, keys, 10)
-      expect(h.dig(*keys)).to eq(10)
-    end
-
-    it 'will set an existing value' do
-      h = {}
-
-      described_class.set_in(h, keys, 10)
-      described_class.set_in(h, keys, 11)
-
-      expect(h.dig(*keys)).to eq(11)
-    end
-
-    it 'does not affect existing values' do
-      h = { a: { x: 1, y: 2 } }
-      described_class.set_in(h, keys, 10)
-
-      expect(h.dig(*keys)).to eq(10)
-      expect(h.dig(:a, :x)).to eq(1)
-      expect(h.dig(:a, :y)).to eq(2)
-    end
-
-    it 'does not mutate the key' do
-      described_class.set_in({}, keys, 10)
-
-      expect(keys).to eq(%i[a b c d])
-    end
-
-    it 'does not set anything when passed an empty key' do
-      h = described_class.set_in({}, [], 10)
-
-      expect(h).to be_empty
-    end
-  end
-
   describe '.autovivifying_hash' do
     it 'fulfils the promise of the example' do
       hash = described_class.autovivifying_hash
