@@ -3,7 +3,7 @@ FactoryBot.define do
   factory :package, class: Packages::Package do
     project
     name { 'my/company/app/my-app' }
-    version { '1.0-SNAPSHOT' }
+    sequence(:version) { |n| "1.#{n}-SNAPSHOT" }
     package_type { 'maven' }
 
     factory :maven_package do

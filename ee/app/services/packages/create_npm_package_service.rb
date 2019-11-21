@@ -6,14 +6,9 @@ module Packages
       version = params[:versions].keys.first
       version_data = params[:versions][version]
 
-      existing_package = project.packages.npm.with_name(name).with_version(version)
-
-      return error('Package already exists.', 403) if existing_package.exists?
-
-      package = project.packages.create!(
+      package = project.packages.npm.create!(
         name: name,
-        version: version,
-        package_type: 'npm'
+        version: version
       )
 
       package_file_name = "#{name}-#{version}.tgz"
@@ -26,9 +21,17 @@ module Packages
         file_name: package_file_name
       }
 
-      ::Packages::CreatePackageFileService.new(package, file_params).execute
+      package.transaction do
+        ::Packages::CreatePackageFileService.new(package, file_params).execute
+        ::Packages::CreatePackageDependencyService.new(package, package_dependencies).execute
+      end
 
       package
+    end
+
+    def package_dependencies
+      _version, version_data = params[:versions].first
+      version_data
     end
   end
 end
