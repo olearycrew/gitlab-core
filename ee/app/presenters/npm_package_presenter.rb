@@ -26,12 +26,16 @@ class NpmPackagePresenter
   end
 
   def dist_tags
-    {
-      latest: sorted_versions.last
-    }
+    build_package_tags.tap { |t| t["latest"] ||= sorted_versions.last }
   end
 
   private
+
+  def build_package_tags
+    Hash[
+      package_tags.map { |tag| [tag.name, tag.package.version] }
+    ]
+  end
 
   def build_package_version(package, package_file)
     {
@@ -53,5 +57,9 @@ class NpmPackagePresenter
   def sorted_versions
     versions = packages.map(&:version).compact
     VersionSorter.sort(versions)
+  end
+
+  def package_tags
+    Packages::PackageTag.for_packages(packages)
   end
 end

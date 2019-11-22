@@ -60,11 +60,7 @@ shared_examples 'rejects packages access' do |container_type, user_type, status|
       send(container_type)&.send("add_#{user_type}", user) unless user_type == :no_type
     end
 
-    it "returns #{status}" do
-      subject
-
-      expect(response).to have_gitlab_http_status(status)
-    end
+    it_behaves_like 'returning response status', status
   end
 end
 

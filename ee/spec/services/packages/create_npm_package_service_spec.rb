@@ -11,15 +11,28 @@ describe Packages::CreateNpmPackageService do
     JSON.parse(
       fixture_file('npm/payload.json', dir: 'ee')
         .gsub('@root/npm-test', package_name)
-        .gsub('1.0.1', version))
-      .with_indifferent_access
+        .gsub('1.0.1', version)
+    ).with_indifferent_access
+      .merge!(override)
   end
+  let(:override) { {} }
+  let(:package_name) { "@#{namespace.path}/my-app".freeze }
+
+  subject { described_class.new(project, user, params).execute }
 
   shared_examples 'valid package' do
-    it 'creates a valid package' do
-      package = described_class.new(project, user, params).execute
+    it 'creates a package' do
+      expect { subject }
+        .to change { Packages::Package.count }.by(1)
+        .and change { Packages::Package.npm.count }.by(1)
+        .and change { Packages::PackageTag.count }.by(1)
+    end
 
-      expect(package).to be_valid
+    it { is_expected.to be_valid }
+
+    it 'creates a package with name and version' do
+      package = subject
+
       expect(package.name).to eq(package_name)
       expect(package.version).to eq(version)
     end
@@ -27,8 +40,6 @@ describe Packages::CreateNpmPackageService do
 
   describe '#execute' do
     context 'scoped package' do
-      let(:package_name) { "@#{namespace.path}/my-app".freeze }
-
       it_behaves_like 'valid package'
     end
 
@@ -58,10 +69,15 @@ describe Packages::CreateNpmPackageService do
       let(:package_name) { '@my_other_namespace/my-app' }
 
       it 'raises a RecordInvalid error' do
-        service = described_class.new(project, user, params)
-
-        expect { service.execute }.to raise_error(ActiveRecord::RecordInvalid)
+        expect { subject }.to raise_error(ActiveRecord::RecordInvalid)
       end
+    end
+
+    context 'with empty versions' do
+      let(:override) { { versions: {} } }
+
+      it { expect(subject[:http_status]).to eq 400 }
+      it { expect(subject[:message]).to eq 'Version is empty.' }
     end
   end
 end

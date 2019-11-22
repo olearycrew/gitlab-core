@@ -22,6 +22,85 @@ module API
       end
     end
 
+    desc 'Get all tags for a given an NPM package' do
+      detail 'This feature was introduced in GitLab 12.6'
+      success EE::API::Entities::NpmPackageTag
+    end
+    params do
+      requires :package_name, type: String, desc: 'Package name'
+    end
+    get 'packages/npm/-/package/*package_name/dist-tags', format: false, requirements: NPM_ENDPOINT_REQUIREMENTS do
+      package_name = params[:package_name]
+
+      bad_request!('Package Name') if package_name.blank?
+
+      project = find_project_by_package_name(package_name)
+
+      authorize_read_package!(project)
+      authorize_packages_feature!(project)
+
+      packages = ::Packages::NpmPackagesFinder.new(project, package_name).execute
+
+      present NpmPackagePresenter.new(project, package_name, packages),
+              with: EE::API::Entities::NpmPackageTag
+    end
+
+    params do
+      requires :package_name, type: String, desc: 'Package name'
+      requires :tag, type: String, desc: "Package dist-tag"
+    end
+    namespace 'packages/npm/-/package/*package_name/dist-tags/:tag', requirements: NPM_ENDPOINT_REQUIREMENTS do
+      desc 'Create or Update the given tag for the given NPM package and version' do
+        detail 'This feature was introduced in GitLab 12.6'
+      end
+      put format: false do
+        package_name = params[:package_name]
+        version = env['api.request.body']
+        tag = params[:tag]
+
+        bad_request!('Package Name') if package_name.blank?
+        bad_request!('Version') if version.blank?
+        bad_request!('Tag') if tag.blank?
+
+        project = find_project_by_package_name(package_name)
+        authorize_create_package!(project)
+
+        package = ::Packages::NpmPackagesFinder
+          .new(project, package_name)
+          .find_by_version(version)
+        not_found!('Package') unless package
+
+        ::Packages::CreatePackageTagService.new(package, tag).execute
+
+        no_content!
+      end
+
+      desc 'Deletes the given tag' do
+        detail 'This feature was introduced in GitLab 12.6'
+      end
+      delete format: false do
+        package_name = params[:package_name]
+        tag = params[:tag]
+
+        bad_request!('Package Name') if package_name.blank?
+        bad_request!('Tag') if tag.blank?
+
+        project = find_project_by_package_name(package_name)
+
+        authorize_destroy_package!(project)
+
+        package_tag = ::Packages::PackageTagsFinder
+          .new(project, package_name, package_type: :npm)
+          .find_by_name(tag)
+
+        not_found!('Package tag') unless package_tag
+
+        ::Packages::RemovePackageTagService.new(package_tag).execute
+
+        no_content!
+      end
+    end
+
     desc 'NPM registry endpoint at instance level' do
       detail 'This feature was introduced in GitLab 11.8'
     end
@@ -79,7 +158,7 @@ module API
       end
       route_setting :authentication, job_token_allowed: true
       put ':id/packages/npm/:package_name', requirements: NPM_ENDPOINT_REQUIREMENTS do
-        authorize_create_package!
+        authorize_create_package!(user_project)
 
         created_package = ::Packages::CreateNpmPackageService
           .new(user_project, current_user, params).execute

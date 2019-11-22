@@ -840,6 +840,10 @@ module EE
         expose :dist_tags, as: 'dist-tags'
       end
 
+      class NpmPackageTag < Grape::Entity
+        expose :dist_tags, merge: true
+      end
+
       class Package < Grape::Entity
         expose :id
         expose :name

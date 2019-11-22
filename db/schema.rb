@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_18_182722) do
+ActiveRecord::Schema.define(version: 2019_11_21_161815) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
@@ -2801,6 +2801,7 @@ ActiveRecord::Schema.define(version: 2019_11_18_182722) do
   create_table "packages_package_tags", force: :cascade do |t|
     t.integer "package_id", null: false
     t.string "name", limit: 255, null: false
+    t.index ["package_id", "name"], name: "index_packages_package_tags_on_package_id_and_name", unique: true
     t.index ["package_id"], name: "index_packages_package_tags_on_package_id"
   end
 

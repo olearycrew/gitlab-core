@@ -5,6 +5,9 @@ module Packages
       name = params[:name]
       version = params[:versions].keys.first
       version_data = params[:versions][version]
+      dist_tag = params['dist-tags'].keys.first
+
+      return error('Version is empty.', 400) if version.blank?
 
       existing_package = project.packages.npm.with_name(name).with_version(version)
 
@@ -26,7 +29,10 @@ module Packages
         file_name: package_file_name
       }
 
-      ::Packages::CreatePackageFileService.new(package, file_params).execute
+      package.transaction do
+        ::Packages::CreatePackageFileService.new(package, file_params).execute
+        ::Packages::CreatePackageTagService.new(package, dist_tag).execute
+      end
 
       package
     end

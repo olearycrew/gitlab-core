@@ -21,12 +21,12 @@ module API
         authorize!(:read_package, subject)
       end
 
-      def authorize_create_package!
-        authorize!(:create_package, user_project)
+      def authorize_create_package!(subject)
+        authorize!(:create_package, subject)
       end
 
-      def authorize_destroy_package!
-        authorize!(:destroy_package, user_project)
+      def authorize_destroy_package!(subject)
+        authorize!(:destroy_package, subject)
       end
     end
   end
