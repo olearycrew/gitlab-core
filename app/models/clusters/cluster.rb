@@ -180,7 +180,6 @@ module Clusters
 
     def all_projects
       return projects if project_type?
-
       return groups_projects if group_type?
 
       ::Project.all
