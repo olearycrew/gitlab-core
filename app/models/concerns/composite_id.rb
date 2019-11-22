@@ -39,15 +39,13 @@ module CompositeId
 
       return none if hashes.empty?
 
-      # We enforce that the arguments have the expected keys:
-      sliced = hashes
-        .map { |h| h.slice(*permitted_keys) }
-        .select { |h| h.size == permitted_keys.size }
+      clauses = hashes.map do |hash|
+        permitted_keys.map do |key|
+          # We enforce that the arguments have the expected keys:
+          raise ArgumentError, "all arguments must contain #{permitted_keys}" unless hash.has_key?(key)
 
-      raise ArgumentError, "all arguments must contain #{permitted_keys}" if sliced.size != hashes.size
-
-      clauses = sliced.map do |hash|
-        permitted_keys.map { |k| arel_table[k].eq(hash[k]) }.reduce(:and)
+          arel_table[key].eq(hash[key])
+        end.reduce(:and)
       end
 
       where(clauses.reduce(:or))
