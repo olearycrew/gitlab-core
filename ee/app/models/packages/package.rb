@@ -22,8 +22,7 @@ class Packages::Package < ApplicationRecord
     format: { with: Gitlab::Regex.package_name_regex }
 
   validates :name,
-    uniqueness: { scope: %i[project_id version package_type] },
-    if: -> { version? }
+    uniqueness: { scope: %i[project_id version package_type] }
 
   validate :valid_npm_package_name, if: :npm?
   validate :package_already_taken, if: :npm?

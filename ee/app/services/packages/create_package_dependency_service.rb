@@ -9,7 +9,7 @@ module Packages
     end
 
     def execute
-      Packages::PackageDependencyLink.dependency_types.keys.each do |type|
+      Packages::PackageDependencyLink.dependency_types.each_key do |type|
         create_dependency(type)
       end
     end

@@ -2783,8 +2783,7 @@ ActiveRecord::Schema.define(version: 2019_11_21_161018) do
     t.bigint "package_id", null: false
     t.string "name", limit: 255, null: false
     t.string "version_pattern", limit: 255, null: false
-    t.index ["package_id", "name", "version_pattern"], name: "idx_pkgs_package_dependencies_package_id+name+version_pattern", unique: true
-    t.index ["package_id"], name: "index_packages_package_dependencies_on_package_id"
+    t.index ["package_id", "name", "version_pattern"], name: "idx_pkgs_package_dependencies_package_id_name_version_pattern", unique: true
   end
 
   create_table "packages_package_dependency_links", force: :cascade do |t|
@@ -2792,8 +2791,7 @@ ActiveRecord::Schema.define(version: 2019_11_21_161018) do
     t.bigint "package_dependency_id", null: false
     t.integer "dependency_type", limit: 2, null: false
     t.index ["package_dependency_id"], name: "idx_pkgs_package_dependency_links_on_package_dependency_id"
-    t.index ["package_id", "package_dependency_id", "dependency_type"], name: "idx_pkgs_package_dep_links_on_pkg_id+pkg_dependency_id+dep_type", unique: true
-    t.index ["package_id"], name: "index_packages_package_dependency_links_on_package_id"
+    t.index ["package_id", "package_dependency_id", "dependency_type"], name: "idx_pkgs_package_dep_links_on_pkg_id_pkg_dependency_id_dep_type", unique: true
   end
 
   create_table "packages_package_files", force: :cascade do |t|
