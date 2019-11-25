@@ -1,5 +1,5 @@
 ---
-title: Add NPM dependencies support
+title: Fix dependency metadata on the NPM registry responses
 merge_request: 20549
 author:
 type: fixed
