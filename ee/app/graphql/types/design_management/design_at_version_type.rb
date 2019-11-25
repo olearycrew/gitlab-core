@@ -19,6 +19,11 @@ module Types
             null: false,
             description: "The version this design-at-versions is pinned to"
 
+      field :design,
+            Types::DesignManagement::DesignType,
+            null: false,
+            description: 'The underlying design.'
+
       def cached_stateful_version(_parent)
         version
       end
