@@ -28,11 +28,11 @@ describe NpmPackagePresenter do
     end
 
     context 'for packages with tags' do
-      let!(:package_tag1) { create(:package_tag, package: package1, name: 'release_a') }
-      let!(:package_tag2) { create(:package_tag, package: package1, name: 'test_release') }
-      let!(:package_tag3) { create(:package_tag, package: package2, name: 'release_b') }
-      let!(:package_tag4) { create(:package_tag, package: latest_package, name: 'release_c') }
-      let!(:package_tag5) { create(:package_tag, package: latest_package, name: 'latest') }
+      let!(:package_tag1) { create(:packages_tag, package: package1, name: 'release_a') }
+      let!(:package_tag2) { create(:packages_tag, package: package1, name: 'test_release') }
+      let!(:package_tag3) { create(:packages_tag, package: package2, name: 'release_b') }
+      let!(:package_tag4) { create(:packages_tag, package: latest_package, name: 'release_c') }
+      let!(:package_tag5) { create(:packages_tag, package: latest_package, name: 'latest') }
 
       it { is_expected.to be_a(Hash) }
       it { expect(subject[package_tag1.name]).to eq(package1.version) }

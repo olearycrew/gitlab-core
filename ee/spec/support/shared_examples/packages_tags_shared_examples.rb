@@ -57,9 +57,9 @@ shared_examples 'create package tag' do |user_type|
   it_behaves_like 'returning response status', :no_content
 
   it 'creates the package tag' do
-    expect { subject }.to change { Packages::PackageTag.count }.by(1)
+    expect { subject }.to change { Packages::Tag.count }.by(1)
 
-    last_tag = Packages::PackageTag.last
+    last_tag = Packages::Tag.last
     expect(last_tag.name).to eq(tag_name)
     expect(last_tag.package).to eq(package)
   end
@@ -72,16 +72,16 @@ shared_examples 'create package tag' do |user_type|
 
   context 'with already existing tag' do
     let(:package2) { create(:npm_package, project: project, name: package.name, version: '5.5.55') }
-    let!(:tag) { create(:package_tag, package: package2, name: tag_name) }
+    let!(:tag) { create(:packages_tag, package: package2, name: tag_name) }
 
     it_behaves_like 'returning response status', :no_content
 
     it 'reuses existing tag' do
-      expect(package.package_tags).to be_empty
-      expect(package2.package_tags).to eq([tag])
-      expect { subject }.to not_change { Packages::PackageTag.count }
-      expect(package.reload.package_tags).to eq([tag])
-      expect(package2.reload.package_tags).to be_empty
+      expect(package.tags).to be_empty
+      expect(package2.tags).to eq([tag])
+      expect { subject }.to not_change { Packages::Tag.count }
+      expect(package.reload.tags).to eq([tag])
+      expect(package2.reload.tags).to be_empty
     end
 
     it 'returns a valid response' do
@@ -144,14 +144,14 @@ shared_examples 'delete package tag' do |user_type|
     end
 
     it 'destroy the package tag' do
-      expect(package.package_tags).to eq([package_tag])
-      expect { subject }.to change { Packages::PackageTag.count }.by(-1)
-      expect(package.reload.package_tags).to be_empty
+      expect(package.tags).to eq([package_tag])
+      expect { subject }.to change { Packages::Tag.count }.by(-1)
+      expect(package.reload.tags).to be_empty
     end
 
     context 'with tag from other package' do
       let(:package2) { create(:npm_package, project: project) }
-      let(:package_tag) { create(:package_tag, package: package2) }
+      let(:package_tag) { create(:packages_tag, package: package2) }
 
       it_behaves_like 'returning response status', :not_found
     end

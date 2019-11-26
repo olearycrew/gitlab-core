@@ -25,7 +25,7 @@ describe Packages::CreateNpmPackageService do
       expect { subject }
         .to change { Packages::Package.count }.by(1)
         .and change { Packages::Package.npm.count }.by(1)
-        .and change { Packages::PackageTag.count }.by(1)
+        .and change { Packages::Tag.count }.by(1)
     end
 
     it { is_expected.to be_valid }

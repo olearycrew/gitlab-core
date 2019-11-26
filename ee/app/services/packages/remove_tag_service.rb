@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module Packages
-  class RemovePackageTagService < BaseService
+  class RemoveTagService < BaseService
     attr_reader :package_tag
 
     def initialize(package_tag)

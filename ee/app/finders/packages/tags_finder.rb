@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Packages::PackageTagsFinder
+class Packages::TagsFinder
   attr_reader :project, :package_name, :params
 
   delegate :find_by_name, to: :execute
@@ -15,7 +15,7 @@ class Packages::PackageTagsFinder
                       .with_name(package_name)
     packages = packages.with_package_type(package_type) if package_type
 
-    Packages::PackageTag.for_packages(packages)
+    Packages::Tag.for_packages(packages)
   end
 
   private

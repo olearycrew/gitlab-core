@@ -31,7 +31,7 @@ module Packages
 
       package.transaction do
         ::Packages::CreatePackageFileService.new(package, file_params).execute
-        ::Packages::CreatePackageTagService.new(package, dist_tag).execute
+        ::Packages::CreateTagService.new(package, dist_tag).execute
       end
 
       package

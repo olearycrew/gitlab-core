@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Packages::PackageTag < ApplicationRecord
+class Packages::Tag < ApplicationRecord
   belongs_to :package
 
   validates :package, :name, presence: true

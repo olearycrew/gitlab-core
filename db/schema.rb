@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_21_161815) do
+ActiveRecord::Schema.define(version: 2019_11_26_134210) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
@@ -2798,13 +2798,6 @@ ActiveRecord::Schema.define(version: 2019_11_21_161815) do
     t.index ["package_id"], name: "index_packages_package_metadata_on_package_id", unique: true
   end
 
-  create_table "packages_package_tags", force: :cascade do |t|
-    t.integer "package_id", null: false
-    t.string "name", limit: 255, null: false
-    t.index ["package_id", "name"], name: "index_packages_package_tags_on_package_id_and_name", unique: true
-    t.index ["package_id"], name: "index_packages_package_tags_on_package_id"
-  end
-
   create_table "packages_packages", force: :cascade do |t|
     t.integer "project_id", null: false
     t.datetime_with_timezone "created_at", null: false
@@ -2814,6 +2807,13 @@ ActiveRecord::Schema.define(version: 2019_11_21_161815) do
     t.integer "package_type", limit: 2, null: false
     t.index ["name"], name: "index_packages_packages_on_name_trigram", opclass: :gin_trgm_ops, using: :gin
     t.index ["project_id"], name: "index_packages_packages_on_project_id"
+  end
+
+  create_table "packages_tags", force: :cascade do |t|
+    t.integer "package_id", null: false
+    t.string "name", limit: 255, null: false
+    t.index ["package_id", "name"], name: "index_packages_tags_on_package_id_and_name", unique: true
+    t.index ["package_id"], name: "index_packages_tags_on_package_id"
   end
 
   create_table "pages_domain_acme_orders", force: :cascade do |t|
@@ -4509,8 +4509,8 @@ ActiveRecord::Schema.define(version: 2019_11_21_161815) do
   add_foreign_key "packages_maven_metadata", "packages_packages", column: "package_id", name: "fk_be88aed360", on_delete: :cascade
   add_foreign_key "packages_package_files", "packages_packages", column: "package_id", name: "fk_86f0f182f8", on_delete: :cascade
   add_foreign_key "packages_package_metadata", "packages_packages", column: "package_id", on_delete: :cascade
-  add_foreign_key "packages_package_tags", "packages_packages", column: "package_id", on_delete: :cascade
   add_foreign_key "packages_packages", "projects", on_delete: :cascade
+  add_foreign_key "packages_tags", "packages_packages", column: "package_id", on_delete: :cascade
   add_foreign_key "pages_domain_acme_orders", "pages_domains", on_delete: :cascade
   add_foreign_key "pages_domains", "projects", name: "fk_ea2f6dfc6f", on_delete: :cascade
   add_foreign_key "path_locks", "projects", name: "fk_5265c98f24", on_delete: :cascade

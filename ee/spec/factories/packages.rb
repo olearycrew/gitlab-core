@@ -188,4 +188,9 @@ FactoryBot.define do
       conan_package_reference { '123456789' }
     end
   end
+
+  factory :packages_tag, class: Packages::Tag do
+    package
+    sequence(:name) { |n| "tag-#{n}"}
+  end
 end

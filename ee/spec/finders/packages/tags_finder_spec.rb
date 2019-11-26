@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Packages::PackageTagsFinder do
+describe Packages::TagsFinder do
   let(:package) { create(:npm_package) }
   let(:project) { package.project }
-  let!(:tag1) { create(:package_tag, package: package) }
-  let!(:tag2) { create(:package_tag, package: package) }
+  let!(:tag1) { create(:packages_tag, package: package) }
+  let!(:tag2) { create(:packages_tag, package: package) }
   let(:package_name) { package.name }
   let(:params) { {} }
 
@@ -16,7 +16,7 @@ describe Packages::PackageTagsFinder do
 
     context 'with package type' do
       let(:package_maven) { create(:maven_package, project: project) }
-      let!(:tag_maven) { create(:package_tag, package: package_maven) }
+      let!(:tag_maven) { create(:packages_tag, package: package_maven) }
       let(:package_name) { package_maven.name }
       let(:params) { { package_type: package_maven.package_type } }
 
@@ -39,7 +39,7 @@ describe Packages::PackageTagsFinder do
 
     context 'with package type' do
       let(:package_maven) { create(:maven_package, project: project) }
-      let!(:tag_maven) { create(:package_tag, package: package_maven) }
+      let!(:tag_maven) { create(:packages_tag, package: package_maven) }
       let(:package_name) { package_maven.name }
       let(:params) { { package_type: package_maven.package_type } }
       let(:tag_name) { tag_maven.name }

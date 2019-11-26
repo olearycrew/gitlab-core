@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module Packages
-  class CreatePackageTagService
+  class CreateTagService
     include Gitlab::Utils::StrongMemoize
 
     attr_reader :package, :tag_name
@@ -15,7 +15,7 @@ module Packages
         existing_tag.update!(package_id: package.id)
         existing_tag
       else
-        package.package_tags.create!(name: tag_name)
+        package.tags.create!(name: tag_name)
       end
     end
 
@@ -23,7 +23,7 @@ module Packages
 
     def existing_tag
       strong_memoize(:existing_tag) do
-        Packages::PackageTagsFinder
+        Packages::TagsFinder
           .new(package.project, package.name, package_type: package.package_type)
           .find_by_name(tag_name)
       end

@@ -70,7 +70,7 @@ module API
           .find_by_version(version)
         not_found!('Package') unless package
 
-        ::Packages::CreatePackageTagService.new(package, tag).execute
+        ::Packages::CreateTagService.new(package, tag).execute
 
         no_content!
       end
@@ -89,13 +89,13 @@ module API
 
         authorize_destroy_package!(project)
 
-        package_tag = ::Packages::PackageTagsFinder
+        package_tag = ::Packages::TagsFinder
           .new(project, package_name, package_type: :npm)
           .find_by_name(tag)
 
         not_found!('Package tag') unless package_tag
 
-        ::Packages::RemovePackageTagService.new(package_tag).execute
+        ::Packages::RemoveTagService.new(package_tag).execute
 
         no_content!
       end

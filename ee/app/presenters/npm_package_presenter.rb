@@ -60,6 +60,6 @@ class NpmPackagePresenter
   end
 
   def package_tags
-    Packages::PackageTag.for_packages(packages)
+    Packages::Tag.for_packages(packages)
   end
 end

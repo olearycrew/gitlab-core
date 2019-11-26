@@ -194,7 +194,7 @@ describe API::NpmPackages do
           expect { upload_package_with_token(package_name, params) }
             .to change { project.packages.count }.by(1)
             .and change { Packages::PackageFile.count }.by(1)
-            .and change { Packages::PackageTag.count }.by(1)
+            .and change { Packages::Tag.count }.by(1)
 
           expect(response).to have_gitlab_http_status(200)
         end
@@ -231,8 +231,8 @@ describe API::NpmPackages do
 
   describe 'GET /api/v4/packages/npm/-/package/*package_name/dist-tags' do
     let(:package) { create(:npm_package, project: project) }
-    let!(:package_tag1) { create(:package_tag, package: package) }
-    let!(:package_tag2) { create(:package_tag, package: package) }
+    let!(:package_tag1) { create(:packages_tag, package: package) }
+    let!(:package_tag2) { create(:packages_tag, package: package) }
     let(:package_name) { package.name }
     let(:user) { create(:user) }
     let(:url) { "/packages/npm/-/package/#{package_name}/dist-tags" }
@@ -328,7 +328,7 @@ describe API::NpmPackages do
 
   describe 'DELETE /api/v4/packages/npm/-/package/*package_name/dist-tags/:tag' do
     let(:package) { create(:npm_package, project: project) }
-    let(:package_tag) { create(:package_tag, package: package) }
+    let(:package_tag) { create(:packages_tag, package: package) }
     let(:user) { create(:user) }
     let(:package_name) { package.name }
     let(:tag_name) { package_tag.name }
