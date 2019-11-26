@@ -3,7 +3,7 @@ export const noneEpic = {
   title: 'none',
 };
 
-export const reportsTypes = {
+export const securityReportsTypes = {
   SAST: 'sast',
   CONTAINER_SCANNING: 'containerScanning',
   DAST: 'dast',
