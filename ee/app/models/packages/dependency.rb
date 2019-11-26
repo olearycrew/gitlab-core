@@ -8,7 +8,7 @@ class Packages::Dependency < ApplicationRecord
   validates :name,
     uniqueness: { scope: %i[package_id version_pattern] }
 
-  def self.for_names_and_version_patterns(names = [], version_patterns = [], chunk_size = 50)
+  def self.for_names_and_version_patterns(names = [], version_patterns = [], chunk_size = 50, max_rows_limit = 200)
     raise ArgumentError, "Parameters sizes don't match" unless names.size == version_patterns.size
 
     sanitized_names = names.map { |n| connection.quote(n) }
@@ -25,6 +25,8 @@ class Packages::Dependency < ApplicationRecord
 
     matched_ids.flatten!
     return none if matched_ids.empty?
+
+    raise ArgumentError, "Parameters select too many Dependencies" if matched_ids.size > max_rows_limit
 
     where(id: matched_ids)
   end

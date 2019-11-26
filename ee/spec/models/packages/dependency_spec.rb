@@ -35,12 +35,10 @@ RSpec.describe Packages::Dependency, type: :model do
     context 'with different parameters size' do
       let(:names) { %w[foo bar unknown] }
 
-      it 'raises an Argument error' do
-        expect { subject }.to raise_error(ArgumentError, "Parameters sizes don't match")
-      end
+      it { expect { subject }.to raise_error(ArgumentError, "Parameters sizes don't match") }
     end
 
-    context 'with parameters size above the chunk size' do
+    context 'with parameters size' do
       let!(:package_dependency3) { create(:packages_dependency, package: package_dependency1.package, name: "foo3", version_pattern: "~1.5.3") }
       let!(:package_dependency4) { create(:packages_dependency, package: package_dependency1.package, name: "foo4", version_pattern: "~1.5.4") }
       let!(:package_dependency5) { create(:packages_dependency, package: package_dependency1.package, name: "foo5", version_pattern: "~1.5.5") }
@@ -48,10 +46,22 @@ RSpec.describe Packages::Dependency, type: :model do
       let!(:package_dependency7) { create(:packages_dependency, package: package_dependency1.package, name: "foo7", version_pattern: "~1.5.7") }
       let(:names) { %w[foo bar foo3 foo4 foo5 foo6 foo7] }
       let(:version_patterns) { %w[~1.0.0 ~2.5.0 ~1.5.3 ~1.5.4 ~1.5.5 ~1.5.6 ~1.5.7] }
+      let(:chunk_size) { 50 }
+      let(:rows_limit) { 50 }
 
-      subject { Packages::Dependency.for_names_and_version_patterns(names, version_patterns, 2) }
+      subject { Packages::Dependency.for_names_and_version_patterns(names, version_patterns, chunk_size, rows_limit) }
 
-      it { is_expected.to match_array([package_dependency1, package_dependency2, package_dependency3, package_dependency4, package_dependency5, package_dependency6, package_dependency7]) }
+      context 'above the chunk size' do
+        let(:chunk_size) { 2 }
+
+        it { is_expected.to match_array([package_dependency1, package_dependency2, package_dependency3, package_dependency4, package_dependency5, package_dependency6, package_dependency7]) }
+      end
+
+      context 'selecting too many rows' do
+        let(:rows_limit) { 2 }
+
+        it { expect { subject }.to raise_error(ArgumentError, "Parameters select too many Dependencies") }
+      end
     end
   end
 end
