@@ -188,4 +188,16 @@ FactoryBot.define do
       conan_package_reference { '123456789' }
     end
   end
+
+  factory :packages_dependency, class: Packages::Dependency do
+    package
+    sequence(:name) { |n| "@test/package-#{n}"}
+    sequence(:version_pattern) { |n| "~6.2.#{n}" }
+  end
+
+  factory :packages_dependency_link, class: Packages::DependencyLink do
+    package
+    dependency { create(:packages_dependency, package: package) }
+    dependency_type { :dependencies }
+  end
 end

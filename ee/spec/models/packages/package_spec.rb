@@ -7,8 +7,8 @@ RSpec.describe Packages::Package, type: :model do
   describe 'relationships' do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to have_many(:package_files).dependent(:destroy) }
-    it { is_expected.to have_many(:package_dependencies) }
-    it { is_expected.to have_many(:package_dependency_links) }
+    it { is_expected.to have_many(:dependencies) }
+    it { is_expected.to have_many(:dependency_links) }
     it { is_expected.to have_one(:conan_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:maven_metadatum).inverse_of(:package) }
   end

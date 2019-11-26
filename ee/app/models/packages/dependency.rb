@@ -1,7 +1,7 @@
 # frozen_string_literal: true
-class Packages::PackageDependency < ApplicationRecord
+class Packages::Dependency < ApplicationRecord
   belongs_to :package
-  has_many :package_dependency_links
+  has_many :dependency_links, class_name: 'Packages::DependencyLink'
 
   validates :package, :name, :version_pattern, presence: true
 

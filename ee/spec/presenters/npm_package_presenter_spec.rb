@@ -27,7 +27,7 @@ describe NpmPackagePresenter do
 
     context 'for packages with dependencies' do
       NpmPackagePresenter::NPM_VALID_DEPENDENCY_TYPES.each do |dependency_type|
-        let!("package_dependency_link_for_#{dependency_type}") { create(:package_dependency_link, package: package1, dependency_type: dependency_type) }
+        let!("package_dependency_link_for_#{dependency_type}") { create(:packages_dependency_link, package: package1, dependency_type: dependency_type) }
       end
 
       it { is_expected.to be_a(Hash) }

@@ -28,11 +28,11 @@ describe API::NpmPackages do
 
   describe 'GET /api/v4/packages/npm/*package_name' do
     let(:package) { create(:npm_package, project: project) }
-    let!(:package_dependency_link1) { create(:package_dependency_link, package: package, dependency_type: :dependencies) }
-    let!(:package_dependency_link2) { create(:package_dependency_link, package: package, dependency_type: :devDependencies) }
-    let!(:package_dependency_link3) { create(:package_dependency_link, package: package, dependency_type: :bundleDependencies) }
-    let!(:package_dependency_link4) { create(:package_dependency_link, package: package, dependency_type: :peerDependencies) }
-    let!(:package_dependency_link5) { create(:package_dependency_link, package: package, dependency_type: :deprecated) }
+    let!(:package_dependency_link1) { create(:packages_dependency_link, package: package, dependency_type: :dependencies) }
+    let!(:package_dependency_link2) { create(:packages_dependency_link, package: package, dependency_type: :devDependencies) }
+    let!(:package_dependency_link3) { create(:packages_dependency_link, package: package, dependency_type: :bundleDependencies) }
+    let!(:package_dependency_link4) { create(:packages_dependency_link, package: package, dependency_type: :peerDependencies) }
+    let!(:package_dependency_link5) { create(:packages_dependency_link, package: package, dependency_type: :deprecated) }
 
     context 'a public project' do
       it 'returns the package info without oauth token' do
@@ -214,8 +214,8 @@ describe API::NpmPackages do
           expect { upload_package_with_token(package_name, params) }
             .to change { project.packages.count }.by(1)
             .and change { Packages::PackageFile.count }.by(1)
-            .and change { Packages::PackageDependency.count}.by(4)
-            .and change { Packages::PackageDependencyLink.count}.by(7)
+            .and change { Packages::Dependency.count}.by(4)
+            .and change { Packages::DependencyLink.count}.by(7)
 
           expect(response).to have_gitlab_http_status(200)
         end

@@ -2768,6 +2768,21 @@ ActiveRecord::Schema.define(version: 2019_11_21_161018) do
     t.index ["package_id"], name: "index_packages_conan_metadata_on_package_id", unique: true
   end
 
+  create_table "packages_dependencies", force: :cascade do |t|
+    t.bigint "package_id", null: false
+    t.string "name", limit: 255, null: false
+    t.string "version_pattern", limit: 255, null: false
+    t.index ["package_id", "name", "version_pattern"], name: "idx_pkgs_dependencies_package_id_name_version_pattern", unique: true
+  end
+
+  create_table "packages_dependency_links", force: :cascade do |t|
+    t.bigint "package_id", null: false
+    t.bigint "dependency_id", null: false
+    t.integer "dependency_type", limit: 2, null: false
+    t.index ["dependency_id"], name: "index_packages_dependency_links_on_dependency_id"
+    t.index ["package_id", "dependency_id", "dependency_type"], name: "idx_pkgs_dep_links_on_pkg_id_dependency_id_dependency_type", unique: true
+  end
+
   create_table "packages_maven_metadata", force: :cascade do |t|
     t.bigint "package_id", null: false
     t.datetime_with_timezone "created_at", null: false
@@ -2777,21 +2792,6 @@ ActiveRecord::Schema.define(version: 2019_11_21_161018) do
     t.string "app_version"
     t.string "path", limit: 512, null: false
     t.index ["package_id", "path"], name: "index_packages_maven_metadata_on_package_id_and_path"
-  end
-
-  create_table "packages_package_dependencies", force: :cascade do |t|
-    t.bigint "package_id", null: false
-    t.string "name", limit: 255, null: false
-    t.string "version_pattern", limit: 255, null: false
-    t.index ["package_id", "name", "version_pattern"], name: "idx_pkgs_package_dependencies_package_id_name_version_pattern", unique: true
-  end
-
-  create_table "packages_package_dependency_links", force: :cascade do |t|
-    t.bigint "package_id", null: false
-    t.bigint "package_dependency_id", null: false
-    t.integer "dependency_type", limit: 2, null: false
-    t.index ["package_dependency_id"], name: "idx_pkgs_package_dependency_links_on_package_dependency_id"
-    t.index ["package_id", "package_dependency_id", "dependency_type"], name: "idx_pkgs_package_dep_links_on_pkg_id_pkg_dependency_id_dep_type", unique: true
   end
 
   create_table "packages_package_files", force: :cascade do |t|
@@ -4517,10 +4517,10 @@ ActiveRecord::Schema.define(version: 2019_11_21_161018) do
   add_foreign_key "operations_feature_flags_clients", "projects", on_delete: :cascade
   add_foreign_key "packages_conan_file_metadata", "packages_package_files", column: "package_file_id", on_delete: :cascade
   add_foreign_key "packages_conan_metadata", "packages_packages", column: "package_id", on_delete: :cascade
+  add_foreign_key "packages_dependencies", "packages_packages", column: "package_id", on_delete: :cascade
+  add_foreign_key "packages_dependency_links", "packages_dependencies", column: "dependency_id", on_delete: :cascade
+  add_foreign_key "packages_dependency_links", "packages_packages", column: "package_id", on_delete: :cascade
   add_foreign_key "packages_maven_metadata", "packages_packages", column: "package_id", name: "fk_be88aed360", on_delete: :cascade
-  add_foreign_key "packages_package_dependencies", "packages_packages", column: "package_id", on_delete: :cascade
-  add_foreign_key "packages_package_dependency_links", "packages_package_dependencies", column: "package_dependency_id", on_delete: :cascade
-  add_foreign_key "packages_package_dependency_links", "packages_packages", column: "package_id", on_delete: :cascade
   add_foreign_key "packages_package_files", "packages_packages", column: "package_id", name: "fk_86f0f182f8", on_delete: :cascade
   add_foreign_key "packages_package_tags", "packages_packages", column: "package_id", on_delete: :cascade
   add_foreign_key "packages_packages", "projects", on_delete: :cascade
