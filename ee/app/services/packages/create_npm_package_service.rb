@@ -23,7 +23,7 @@ module Packages
 
       package.transaction do
         ::Packages::CreatePackageFileService.new(package, file_params).execute
-        ::Packages::CreatePackageDependencyService.new(package, package_dependencies).execute
+        ::Packages::CreateDependencyService.new(package, package_dependencies).execute
       end
 
       package

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Packages::CreatePackageDependencyService do
+describe Packages::CreateDependencyService do
   describe '#execute' do
     let(:namespace) {create(:namespace)}
     let(:project) { create(:project, namespace: namespace) }
