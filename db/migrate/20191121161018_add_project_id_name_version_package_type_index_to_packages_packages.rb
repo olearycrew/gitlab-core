@@ -11,8 +11,7 @@ class AddProjectIdNameVersionPackageTypeIndexToPackagesPackages < ActiveRecord::
   def up
     add_concurrent_index :packages_packages,
                          [:project_id, :name, :version, :package_type],
-                         name: INDEX_NAME,
-                         unique: true
+                         name: INDEX_NAME
   end
 
   def down
