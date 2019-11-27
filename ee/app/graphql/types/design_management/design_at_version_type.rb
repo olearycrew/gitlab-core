@@ -9,10 +9,10 @@ module Types
 
       authorize :read_design
 
-      delegate :id, :design, :version, to: :object
-      delegate :project, :issue, :filename, :full_path, :diff_refs, to: :design
+      delegate :design, :version, to: :object
+      delegate :issue, :filename, :full_path, :diff_refs, to: :design
 
-      implements(Types::DesignManagement::DesignFields)
+      implements ::Types::DesignManagement::DesignFields
 
       field :version,
             Types::DesignManagement::VersionType,
@@ -26,6 +26,10 @@ module Types
 
       def cached_stateful_version(_parent)
         version
+      end
+
+      def notes_count
+        design.user_notes_count
       end
     end
   end

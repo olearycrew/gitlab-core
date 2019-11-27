@@ -3,40 +3,45 @@
 module Resolvers
   module DesignManagement
     class DesignResolver < BaseResolver
-      argument :ids,
-               [GraphQL::ID_TYPE],
+      argument :id, GraphQL::ID_TYPE,
                required: false,
-               description: 'Filters designs by their ID'
-      argument :filenames,
-               [GraphQL::STRING_TYPE],
+               description: 'Find a design by its ID'
+
+      argument :filename, GraphQL::STRING_TYPE,
                required: false,
-               description: 'Filters designs by their filename'
-      argument :at_version,
-               GraphQL::ID_TYPE,
-               required: false,
-               description: 'Filters designs to only those that existed at the version. ' \
-                            'If argument is omitted or nil then all designs will reflect the latest version'
+               description: 'Find a design by its filename'
 
       def resolve(**args)
-        find_designs(args)
+        find_design(args)
       end
 
-      def version(args)
-        args[:at_version] ? GitlabSchema.object_from_id(args[:at_version])&.sync : nil
+      private
+
+      def find_design(args)
+        finder = if !args[:filename].present? && !args[:id].present?
+                   raise ::Gitlab::Graphql::Errors::ArgumentError, "one of id or filename must be passed"
+                 elsif args[:filename].present? && args[:id].present?
+                   raise ::Gitlab::Graphql::Errors::ArgumentError, "only one of id or filename may be passed"
+                 elsif args[:filename].present?
+                   finder(filenames: [args[:filename]])
+                 else
+                   gid = GitlabSchema.parse_gid(args[:id], expected_type: ::DesignManagement::Design)
+                   finder(ids: [gid.model_id])
+                 end
+
+        finder.execute.first
       end
 
-      def design_ids(args)
-        args[:ids] ? args[:ids].map { |id| GlobalID.parse(id).model_id } : nil
+      def issue
+        object.issue
       end
 
-      def find_designs(args)
-        ::DesignManagement::DesignsFinder.new(
-          object.issue,
-          context[:current_user],
-          ids: design_ids(args),
-          filenames: args[:filenames],
-          visible_at_version: version(args)
-        ).execute
+      def user
+        context[:current_user]
+      end
+
+      def finder(params)
+        ::DesignManagement::DesignsFinder.new(issue, user, params)
       end
     end
   end

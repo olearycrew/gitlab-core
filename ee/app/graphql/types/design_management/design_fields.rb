@@ -36,7 +36,7 @@ module Types
       def image(parent:)
         sha = cached_stateful_version(parent).sha
 
-        Gitlab::Routing.url_helpers.project_design_url(design.project, design, sha)
+        ::Gitlab::Routing.url_helpers.project_design_url(design.project, design, sha)
       end
 
       def event(parent:)
@@ -44,13 +44,21 @@ module Types
 
         action = cached_actions_for_version(version)[design.id]
 
-        action&.event || Types::DesignManagement::DesignVersionEventEnum::NONE
+        action&.event || ::Types::DesignManagement::DesignVersionEventEnum::NONE
       end
 
       def cached_actions_for_version(version)
         Gitlab::SafeRequestStore.fetch(['DesignFields', 'actions_for_version', version.id]) do
           version.actions.to_h { |dv| [dv.design_id, dv] }
         end
+      end
+
+      def project
+        ::Gitlab::Graphql::Loaders::BatchModelLoader.new(::Project, design.project_id).find
+      end
+
+      def issue
+        ::Gitlab::Graphql::Loaders::BatchModelLoader.new(::Issue, design.issue_id).find
       end
     end
   end
