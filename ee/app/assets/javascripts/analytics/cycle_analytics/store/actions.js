@@ -41,11 +41,12 @@ export const receiveStageDataError = ({ commit }) => {
 
 export const fetchStageData = ({ state, dispatch, getters }, stage) => {
   const { cycleAnalyticsRequestParams = {} } = getters;
-  dispatch('requestStageData');
   const { id, slug } = stage;
   const {
     selectedGroup: { fullPath },
   } = state;
+
+  dispatch('requestStageData');
 
   return Api.cycleAnalyticsStageEvents(
     fullPath,
@@ -150,13 +151,12 @@ export const receiveGroupStagesAndEventsError = ({ commit }) => {
   createFlash(__('There was an error fetching cycle analytics stages.'));
 };
 
-export const receiveGroupStagesAndEventsSuccess = ({ state, getters, commit, dispatch }, data) => {
+export const receiveGroupStagesAndEventsSuccess = ({ state, commit, dispatch }, data) => {
   commit(types.RECEIVE_GROUP_STAGES_AND_EVENTS_SUCCESS, data);
-  const { stages = [] } = data;
-  const { defaultStage } = getters;
-  if (stages.length) {
-    dispatch('setSelectedStage', defaultStage);
-    dispatch('fetchStageData', defaultStage);
+  const { stages = [] } = state;
+  if (stages && stages.length) {
+    dispatch('setSelectedStage', stages[0]);
+    dispatch('fetchStageData', stages[0]);
   } else {
     createFlash(__('There was an error while fetching cycle analytics data.'));
   }
@@ -256,8 +256,8 @@ export const fetchTasksByTypeData = ({ dispatch, state, getters }) => {
 export const requestUpdateStage = ({ commit }) => commit(types.REQUEST_UPDATE_STAGE);
 export const receiveUpdateStageSuccess = ({ commit, dispatch }, updatedData) => {
   commit(types.RECEIVE_UPDATE_STAGE_RESPONSE);
-  createFlash(__('Stage data updated'), 'notice');  
-  
+  createFlash(__('Stage data updated'), 'notice');
+
   dispatch('fetchGroupStagesAndEvents');
   dispatch('setSelectedStage', updatedData);
 };

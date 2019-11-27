@@ -16,6 +16,7 @@ import '~/gl_dropdown';
 import Scatterplot from 'ee/analytics/shared/components/scatterplot.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import * as mockData from '../mock_data';
+import Api from 'ee/api';
 
 const noDataSvgPath = 'path/to/no/data';
 const noAccessSvgPath = 'path/to/no/access';
