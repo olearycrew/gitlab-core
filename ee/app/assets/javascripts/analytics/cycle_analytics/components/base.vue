@@ -60,7 +60,7 @@ export default {
       'isEditingCustomStage',
       'selectedGroup',
       'selectedProjectIds',
-      'selectedStageId',
+      'selectedStage',
       'stages',
       'summary',
       'labels',
@@ -70,10 +70,8 @@ export default {
       'startDate',
       'endDate',
       'tasksByType',
-      'customStageFormInitData',
     ]),
     ...mapGetters([
-      'currentStage',
       'defaultStage',
       'hasNoAccessError',
       'currentGroupPath',
@@ -118,7 +116,7 @@ export default {
       'setSelectedGroup',
       'setSelectedProjects',
       'setSelectedTimeframe',
-      'setSelectedStageId',
+      'setSelectedStage',
       'hideCustomStageForm',
       'showCustomStageForm',
       'setDateRange',
@@ -142,8 +140,8 @@ export default {
     },
     onStageSelect(stage) {
       this.hideCustomStageForm();
-      this.setSelectedStageId(stage.id);
-      this.fetchStageData(this.currentStage.slug);
+      this.setSelectedStage(stage);
+      this.fetchStageData(this.selectedStage);
     },
     onShowAddStageForm() {
       this.showCustomStageForm();
@@ -248,9 +246,9 @@ export default {
         <div v-else>
           <summary-table class="js-summary-table" :items="summary" />
           <stage-table
-            v-if="currentStage"
+            v-if="selectedStage"
             class="js-stage-table"
-            :current-stage="currentStage"
+            :current-stage="selectedStage"
             :stages="stages"
             :is-loading="isLoadingStage"
             :is-empty-stage="isEmptyStage"
@@ -263,7 +261,6 @@ export default {
             :no-data-svg-path="noDataSvgPath"
             :no-access-svg-path="noAccessSvgPath"
             :can-edit-stages="hasCustomizableCycleAnalytics"
-            :custom-stage-form-init-data="customStageFormInitData"
             @selectStage="onStageSelect"
             @editStage="onShowEditStageForm"
             @showAddStageForm="onShowAddStageForm"
