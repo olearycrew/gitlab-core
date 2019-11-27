@@ -202,7 +202,7 @@ describe API::NpmPackages do
           expect { upload_package_with_token(package_name, params) }
             .not_to change { project.packages.count }
 
-          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(response).to have_gitlab_http_status(403)
         end
       end
 
