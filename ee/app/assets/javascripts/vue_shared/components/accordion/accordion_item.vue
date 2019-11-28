@@ -13,6 +13,11 @@ export default {
     Icon,
   },
   props: {
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     onToggle: {
       type: Function,
       required: false,
@@ -37,6 +42,9 @@ export default {
         maxHeight: this.maxHeight,
         overflow: 'auto',
       };
+    },
+    isDisabled() {
+      return this.disabled || !this.hasContent;
     },
     hasContent() {
       return this.$slots.default;
@@ -65,15 +73,22 @@ export default {
         <button
           ref="expansionTrigger"
           :id="buttonId"
+          :disabled="isDisabled"
+          :readonly="isDisabled"
           type="button"
           :aria-expanded="isExpanded"
           :aria-controls="contentId"
-          class="btn border-0 rounded-0 w-100 p-0 text-left"
+          class="btn-transparent border-0 rounded-0 w-100 p-0 text-left"
           @click="handleClick"
         >
-          <div class="d-flex align-items-center p-2">
+          <div
+            class="d-flex align-items-center p-2"
+            :class="{ 'list-group-item-action': !isDisabled }"
+          >
             <icon :size="16" class="mr-2" :name="isExpanded ? 'angle-down' : 'angle-right'" />
-            <span><slot name="title" :is-expanded="isExpanded"></slot></span>
+            <span
+              ><slot name="title" :is-expanded="isExpanded" :is-disabled="isDisabled"></slot
+            ></span>
           </div>
           <div v-if="hasTitleSubheader" v-show="isExpanded" class="pl-5 pb-2">
             <slot name="titleSubheader"></slot>
@@ -97,7 +112,7 @@ export default {
         <gl-skeleton-loader :height="32">
           <rect width="12" height="16" rx="4" x="0" y="8" />
           <circle cx="37" cy="15" r="15" />
-          <rect width="86" height="16" rx="4" x="63" y="8" />
+          <rect width="20" height="16" rx="4" x="63" y="8" />
         </gl-skeleton-loader>
       </div>
     </div>

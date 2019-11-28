@@ -521,7 +521,8 @@ fieldset[disabled] .btn,
 }
 
 [readonly] {
-  cursor: default;
+  // @TODO - note in MR why this is happening, specificity
+  cursor: default !important;
 }
 
 .btn-no-padding {
