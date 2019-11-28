@@ -550,26 +550,54 @@ describe ProjectPolicy do
   end
 
   describe 'read_threat_monitoring' do
-    context 'with developer' do
-      let(:current_user) { developer }
-
-      context 'when threat monitoring is enabled' do
-        before do
-          stub_feature_flags(threat_monitoring: true)
-          stub_licensed_features(threat_monitoring: true)
-        end
-
-        it { is_expected.to be_allowed(:read_threat_monitoring) }
+    context 'when threat monitoring feature is available' do
+      before do
+        stub_feature_flags(threat_monitoring: true)
+        stub_licensed_features(threat_monitoring: true)
       end
 
-      context 'when threat monitoring is disabled' do
-        before do
-          stub_feature_flags(threat_monitoring: false)
-          stub_licensed_features(threat_monitoring: false)
+      context 'with developer or higher role' do
+        where(role: %w[admin owner maintainer developer])
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_allowed(:read_threat_monitoring) }
         end
+      end
+
+      context 'with less than developer role' do
+        where(role: %w[reporter guest])
+
+        with_them do
+          let(:current_user) { public_send(role) }
+
+          it { is_expected.to be_disallowed(:read_threat_monitoring) }
+        end
+      end
+
+      context 'with not member' do
+        let(:current_user) { create(:user) }
 
         it { is_expected.to be_disallowed(:read_threat_monitoring) }
       end
+
+      context 'with anonymous' do
+        let(:current_user) { nil }
+
+        it { is_expected.to be_disallowed(:read_threat_monitoring) }
+      end
+    end
+
+    context 'when threat monitoring feature is not available' do
+      let(:current_user) { admin }
+
+      before do
+        stub_feature_flags(threat_monitoring: false)
+        stub_licensed_features(threat_monitoring: false)
+      end
+
+      it { is_expected.to be_disallowed(:read_threat_monitoring) }
     end
   end
 
