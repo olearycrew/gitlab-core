@@ -127,7 +127,7 @@ module EE
     end
 
     def has_dependency_scanning_reports?
-      !!(actual_head_pipeline&.has_reports?(::Ci::JobArtifact.dependency_list_reports))
+      !!(actual_head_pipeline.any_report_artifact_for_type(:dependency_scanning))
     end
 
     def compare_dependency_scanning_reports(current_user)
@@ -137,11 +137,11 @@ module EE
     end
 
     def has_license_management_reports?
-      !!(actual_head_pipeline&.has_reports?(::Ci::JobArtifact.license_management_reports))
+      !!(actual_head_pipeline.any_report_artifact_for_type(:license_management))
     end
 
     def has_container_scanning_reports?
-      !!(actual_head_pipeline&.has_reports?(::Ci::JobArtifact.container_scanning_reports))
+      !!(actual_head_pipeline.any_report_artifact_for_type(:container_scanning))
     end
 
     def compare_container_scanning_reports(current_user)
@@ -151,7 +151,7 @@ module EE
     end
 
     def has_sast_reports?
-      !!(actual_head_pipeline&.has_reports?(::Ci::JobArtifact.sast_reports))
+      !!(actual_head_pipeline.any_report_artifact_for_type(:sast))
     end
 
     def compare_sast_reports(current_user)
@@ -161,7 +161,7 @@ module EE
     end
 
     def has_dast_reports?
-      !!(actual_head_pipeline&.has_reports?(::Ci::JobArtifact.dast_reports))
+      !!(actual_head_pipeline.any_report_artifact_for_type(:dast))
     end
 
     def compare_dast_reports(current_user)
