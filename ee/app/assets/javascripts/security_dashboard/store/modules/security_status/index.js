@@ -1,19 +1,16 @@
 import axios from 'axios';
 
-import { groupBySeverityLevels } from './utils';
+import { groupBySeverityLevels, getMostSevereVulnerabilityType } from './utils';
 
+// @TODO - break this into files
 const severityLevels = {
   namespaced: true,
   state: {
-    endpoint: '',
     isLoading: '',
     hasError: '',
     projects: [],
   },
   mutations: {
-    setEndpoint(state, url) {
-      state.endpoint = url;
-    },
     setLoading(state, isLoading) {
       state.isLoading = isLoading;
     },
@@ -25,14 +22,11 @@ const severityLevels = {
     },
   },
   actions: {
-    setEndpoint({ commit }, url) {
-      commit('setEndpoint', url);
-    },
-    fetchProjects({ dispatch, state }) {
+    fetchProjects({ dispatch }, endpoint) {
       dispatch('request');
 
       return axios
-        .get(state.endpoint)
+        .get(endpoint)
         .then(({ data }) => {
           dispatch('receiveSuccess', data);
         })
@@ -53,9 +47,9 @@ const severityLevels = {
     },
   },
   getters: {
-    projectsBySeverityLevels({ projects }) {
-      return groupBySeverityLevels(projects);
-    },
+    projectsBySeverityLevels: ({ projects }) => groupBySeverityLevels(projects),
+    mostSevereVulnerabilityCount: () => projectToCheck =>
+      getMostSevereVulnerabilityType(projectToCheck),
   },
 };
 

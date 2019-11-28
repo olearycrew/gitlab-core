@@ -105,6 +105,36 @@ export const projectsToSeverityLevel = {
   [severityLevels.F]: hasVulnerabilitiesForType(vulnerabilityTypes.CRITICAL),
 };
 
+// @TODO - test and docblock
+export const getMostSevereVulnerabilityType = project => {
+  const vulnerabilityTypesBySeverityOrder = [
+    vulnerabilityTypes.CRITICAL,
+    vulnerabilityTypes.HIGH,
+    vulnerabilityTypes.UNKNOWN,
+    vulnerabilityTypes.MEDIUM,
+    vulnerabilityTypes.LOW,
+  ];
+
+  // go through vulnerability types and check if current project has any
+  for (let i = 0; i < vulnerabilityTypesBySeverityOrder.length; i += 1) {
+    const currentTypeToCheck = vulnerabilityTypesBySeverityOrder[i];
+    if (hasVulnerabilitiesForType(currentTypeToCheck)(project)) {
+      return currentTypeToCheck;
+    }
+  }
+
+  return '';
+};
+
+// @TODO - test and docblock
+export const getMostSevereVulnerabilityCount = project => {
+  const type = getMostSevereVulnerabilityType(project);
+  // @TODO move this to function and check if we got something
+  const count = project[`${type}_vulnerability_count`];
+
+  return { type, count };
+};
+
 /**
  * Takes a project containing vulnerability counts and returns
  * the severity level it falls under
@@ -123,9 +153,10 @@ export const getSeverityLevelForProject = project => {
     severityLevels.A,
   ];
 
-  for (const levelToCheck of levelsToCheckInOrder) {
-    if (projectsToSeverityLevel[levelToCheck](project)) {
-      return levelToCheck;
+  for (let i = 0; i < levelsToCheckInOrder.length; i += 1) {
+    const currentLevelToCheck = levelsToCheckInOrder[i];
+    if (projectsToSeverityLevel[currentLevelToCheck](project)) {
+      return currentLevelToCheck;
     }
   }
 
@@ -151,7 +182,12 @@ export const groupBySeverityLevels = projects =>
     const groupForProject = groups[getSeverityLevelForProject(project)];
 
     if (groupForProject) {
-      groups[getSeverityLevelForProject(project)].projects.push(project);
+      groups[getSeverityLevelForProject(project)].projects.push({
+        ...project,
+        mostCritical: {
+          ...getMostSevereVulnerabilityCount(project),
+        },
+      });
     }
 
     return groups;
