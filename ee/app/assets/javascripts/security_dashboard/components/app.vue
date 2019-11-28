@@ -6,6 +6,7 @@ import Filters from './filters.vue';
 import SecurityDashboardTable from './security_dashboard_table.vue';
 import VulnerabilityChart from './vulnerability_chart.vue';
 import VulnerabilityCountList from './vulnerability_count_list.vue';
+import VulnerabilitySeverity from './vulnerability_severity.vue';
 
 export default {
   name: 'SecurityDashboardApp',
@@ -15,6 +16,7 @@ export default {
     SecurityDashboardTable,
     VulnerabilityChart,
     VulnerabilityCountList,
+    VulnerabilitySeverity,
   },
   props: {
     vulnerabilitiesEndpoint: {
@@ -145,8 +147,9 @@ export default {
         </security-dashboard-table>
       </article>
 
-      <aside v-if="shouldShowChart" class="col-xl-5">
-        <vulnerability-chart />
+      <aside v-if="shouldShowChart || true" class="col-xl-5">
+        <vulnerability-chart v-if="shouldShowChart" class="mb-3" />
+        <vulnerability-severity />
       </aside>
     </div>
 
