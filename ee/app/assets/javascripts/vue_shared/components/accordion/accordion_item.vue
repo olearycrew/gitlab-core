@@ -18,13 +18,6 @@ export default {
       required: false,
       default: () => {},
     },
-    showLoadingIndicator: {
-      type: Boolean,
-      required: false,
-      default() {
-        return this.isLoading();
-      },
-    },
     maxHeight: {
       type: String,
       required: false,
@@ -67,7 +60,7 @@ export default {
 
 <template>
   <li class="list-group-item p-0">
-    <template v-if="!showLoadingIndicator">
+    <template v-if="!isLoading()">
       <div class="d-flex align-items-stretch" :class="{ 'bg-warning': !hasContent }">
         <button
           ref="expansionTrigger"
@@ -99,13 +92,14 @@ export default {
         <slot name="default"></slot>
       </div>
     </template>
-    <div ref="loadingIndicator" v-else>
-      <gl-skeleton-loader :width="577" :height="24">
-        <rect width="86" height="24" rx="4" />
-        <rect x="96" y="4" width="300" height="17" rx="4" />
-        <rect x="432" y="4" width="145" height="17" rx="4" />
-        <circle cx="412" cy="12" r="12" />
-      </gl-skeleton-loader>
+    <div v-else ref="loadingIndicator" class="d-flex p-2">
+      <div class="h-32-px">
+        <gl-skeleton-loader :height="32">
+          <rect width="12" height="16" rx="4" x="0" y="8" />
+          <circle cx="37" cy="15" r="15" />
+          <rect width="86" height="16" rx="4" x="63" y="8" />
+        </gl-skeleton-loader>
+      </div>
     </div>
   </li>
 </template>
