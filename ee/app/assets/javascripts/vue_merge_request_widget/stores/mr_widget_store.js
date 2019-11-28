@@ -1,5 +1,5 @@
 import CEMergeRequestStore from '~/vue_merge_request_widget/stores/mr_widget_store';
-import { securityReportsTypes } from 'ee/vue_shared/constants';
+import { securityReportsTypes } from 'ee/vue_shared/security_reports/constants';
 import { mapApprovalsResponse, mapApprovalRulesResponse } from '../mappers';
 import CodeQualityComparisonWorker from '../workers/code_quality_comparison_worker';
 
