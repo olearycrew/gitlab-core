@@ -17,7 +17,7 @@ module Clusters
       end
 
       def cluster_missing_error(service)
-        ActiveRecord::RecordNotFound.new("Can't deactivate #{service} services, host cluster not found! Some inconsistent records may left in database.")
+        ActiveRecord::RecordNotFound.new("Can't deactivate #{service} services, host cluster not found! Some inconsistent records may be left in database.")
       end
     end
   end
