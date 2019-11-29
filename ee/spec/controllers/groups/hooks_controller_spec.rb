@@ -36,8 +36,8 @@ describe Groups::HooksController do
           pipeline_events: true,
           push_events: true,
           tag_push_events: true,
-          token: "TEST TOKEN",
-          url: "http://example.com",
+          token: 'TEST TOKEN',
+          url: 'http://example.com',
           wiki_page_events: true
         }
 
@@ -46,6 +46,67 @@ describe Groups::HooksController do
         expect(response).to have_gitlab_http_status(302)
         expect(group.hooks.size).to eq(1)
         expect(group.hooks.first).to have_attributes(hook_params)
+      end
+    end
+
+    describe 'GET #edit' do
+      let(:hook) { create(:group_hook, group: group) }
+
+      it 'is successfull' do
+        get :edit, params: { group_id: group.to_param, id: hook }
+
+        expect(response).to have_gitlab_http_status(200)
+        expect(response).to render_template(:edit)
+        expect(group.hooks.size).to eq(1)
+      end
+    end
+
+    describe 'PATCH #update' do
+      let(:hook) { create(:group_hook, group: group) }
+
+      context 'valid params' do
+        let(:hook_params) do
+          {
+            job_events: true,
+            confidential_issues_events: true,
+            enable_ssl_verification: true,
+            issues_events: true,
+            merge_requests_events: true,
+            note_events: true,
+            pipeline_events: true,
+            push_events: true,
+            tag_push_events: true,
+            token: 'TEST TOKEN',
+            url: 'http://example.com',
+            wiki_page_events: true
+          }
+        end
+
+        it 'is successfull' do
+          patch :update, params: { group_id: group.to_param, id: hook, hook: hook_params }
+
+          expect(response).to have_gitlab_http_status(302)
+          expect(response).to redirect_to(group_hooks_path(group))
+          expect(group.hooks.size).to eq(1)
+          expect(group.hooks.first).to have_attributes(hook_params)
+        end
+      end
+
+      context 'invalid params' do
+        let(:hook_params) do
+          {
+            url: ''
+          }
+        end
+
+        it 'renders "edit" template' do
+          patch :update, params: { group_id: group.to_param, id: hook, hook: hook_params }
+
+          expect(response).to have_gitlab_http_status(200)
+          expect(response).to render_template(:edit)
+          expect(group.hooks.size).to eq(1)
+          expect(group.hooks.first).not_to have_attributes(hook_params)
+        end
       end
     end
   end

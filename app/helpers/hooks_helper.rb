@@ -3,6 +3,8 @@
 module HooksHelper
   def link_to_test_hook(hook, trigger)
     path = case hook
+           when GroupHook
+             test_group_hook_path(hook.group, hook, trigger: trigger)
            when ProjectHook
              project = hook.project
              test_project_hook_path(project, hook, trigger: trigger)
