@@ -72,7 +72,6 @@ export default {
       'tasksByType',
     ]),
     ...mapGetters([
-      'defaultStage',
       'hasNoAccessError',
       'currentGroupPath',
       'durationChartPlottableData',
