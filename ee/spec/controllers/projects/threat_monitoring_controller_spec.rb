@@ -29,6 +29,11 @@ describe Projects::ThreatMonitoringController do
       end
 
       context 'when feature is not available' do
+        before do
+          stub_feature_flags(threat_monitoring: false)
+          stub_licensed_features(threat_monitoring: false)
+        end
+
         it 'returns 404' do
           subject
 
