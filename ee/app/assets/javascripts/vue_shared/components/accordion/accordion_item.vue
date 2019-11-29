@@ -27,7 +27,7 @@ export default {
       type: String,
       required: false,
       default() {
-        return this.contentMaxHeight();
+        return this.$parent.contentMaxHeight;
       },
     },
   },
@@ -71,8 +71,8 @@ export default {
     <template v-if="!isLoading()">
       <div class="d-flex align-items-stretch" :class="{ 'bg-warning': !hasContent }">
         <button
-          ref="expansionTrigger"
           :id="buttonId"
+          ref="expansionTrigger"
           :disabled="isDisabled"
           :readonly="isDisabled"
           type="button"
@@ -90,17 +90,13 @@ export default {
               ><slot name="title" :is-expanded="isExpanded" :is-disabled="isDisabled"></slot
             ></span>
           </div>
-          <div v-if="hasTitleSubheader" v-show="isExpanded" class="pl-5 pb-2">
-            <slot name="titleSubheader"></slot>
-          </div>
         </button>
       </div>
       <div
         v-show="isExpanded"
-        ref="content"
         :id="contentId"
+        ref="content"
         :aria-labelledby="buttonId"
-        class="py-2"
         :style="contentStyles"
         role="region"
       >

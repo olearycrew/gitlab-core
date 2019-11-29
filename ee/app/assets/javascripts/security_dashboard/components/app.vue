@@ -149,7 +149,7 @@ export default {
 
       <aside v-if="shouldShowChart || true" class="col-xl-5">
         <vulnerability-chart v-if="shouldShowChart" class="mb-3" />
-        <vulnerability-severity />
+        <vulnerability-severity :endpoint="''" />
       </aside>
     </div>
 
