@@ -18,7 +18,7 @@ describe Clusters::Applications::Prometheus do
 
       it 'deactivates prometheus_service after destroy' do
         expect(Clusters::Applications::DeactivateServiceWorker)
-        .to receive(:perform_async).with(cluster.id, 'prometheus')
+          .to receive(:perform_async).with(cluster.id, 'prometheus')
 
         application.destroy!
       end

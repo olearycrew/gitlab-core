@@ -22,7 +22,7 @@ describe Clusters::Applications::DeactivateServiceWorker, '#perform' do
 
           it 'ensures Prometheus service is deactivated' do
             expect { described_class.new.perform(cluster.id, service_name) }
-            .to change { prometheus_service.reload.active }.from(true).to(false)
+              .to change { prometheus_service.reload.active }.from(true).to(false)
           end
         end
 
@@ -32,7 +32,7 @@ describe Clusters::Applications::DeactivateServiceWorker, '#perform' do
 
           it 'ensures Prometheus service is deactivated' do
             expect { described_class.new.perform(cluster.id, service_name) }
-            .to change { prometheus_service.reload.active }.from(true).to(false)
+              .to change { prometheus_service.reload.active }.from(true).to(false)
           end
         end
 
@@ -42,7 +42,7 @@ describe Clusters::Applications::DeactivateServiceWorker, '#perform' do
 
           it 'ensures Prometheus service is deactivated' do
             expect { described_class.new.perform(cluster.id, service_name) }
-            .to change { prometheus_service.reload.active }.from(true).to(false)
+              .to change { prometheus_service.reload.active }.from(true).to(false)
           end
         end
       end

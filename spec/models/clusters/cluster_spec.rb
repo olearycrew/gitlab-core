@@ -622,7 +622,7 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
       let(:project) { create(:project) }
       let(:cluster) { create(:cluster, :with_installed_helm, projects: [project]) }
 
-      it 'returns project' do
+      it 'returns projects' do
         expect(cluster.all_projects).to match_array [project]
       end
     end
@@ -641,7 +641,7 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
       let!(:project) { create(:project) }
       let(:cluster) { create(:cluster, :instance) }
 
-      it 'returns all instance\'s projects' do
+      it "returns all instance's projects" do
         expect(cluster.all_projects.ids).to match_array [project.id]
       end
     end
