@@ -2,19 +2,12 @@
 
 .row.prepend-top-default
   .col-lg-3
-    %h4.prepend-top-0
-      = page_title
-    %p
-      #{link_to 'Webhooks', help_page_path('user/project/integrations/webhooks')} can be
-      used for binding events when something is happening within the project.
+    = render 'shared/web_hooks/title_and_docs', hook: @hook
+
   .col-lg-9.append-bottom-default
     = form_for [@group, @hook], as: :hook, url: group_hook_path(@group, @hook) do |f|
       = render partial: 'shared/web_hooks/form', locals: { form: f, hook: @hook }
 
       = f.submit 'Save changes', class: 'btn btn-success'
-      = render 'shared/web_hooks/test_button', triggers: GroupHook.triggers, hook: @hook
+      = render 'shared/web_hooks/test_button', hook: @hook
       = link_to 'Remove', group_hook_path(@group, @hook), method: :delete, class: 'btn btn-remove float-right', data: { confirm: 'Are you sure?' }
-
-%hr
-
--# = render partial: 'projects/hook_logs/index', locals: { hook: @hook, hook_logs: @hook_logs, project: @project }

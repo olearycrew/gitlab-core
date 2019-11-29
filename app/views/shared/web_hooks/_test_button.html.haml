@@ -1,6 +1,6 @@
-- triggers = local_assigns.fetch(:triggers)
 - button_class = local_assigns.fetch(:button_class, '')
 - hook = local_assigns.fetch(:hook)
+- triggers = hook.class.triggers
 
 .hook-test-button.dropdown.inline
   %button.btn{ 'data-toggle' => 'dropdown', class: button_class }
