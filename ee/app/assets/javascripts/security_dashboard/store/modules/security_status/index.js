@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { groupBySeverityLevels, getMostSevereVulnerabilityType } from './utils';
+import { groupBySeverity } from './utils';
 
 // @TODO - break this into files
 const severityLevels = {
@@ -47,9 +47,7 @@ const severityLevels = {
     },
   },
   getters: {
-    projectsBySeverityLevels: ({ projects }) => groupBySeverityLevels(projects),
-    mostSevereVulnerabilityCount: () => projectToCheck =>
-      getMostSevereVulnerabilityType(projectToCheck),
+    severityGroups: ({ projects }) => groupBySeverity(projects),
   },
 };
 

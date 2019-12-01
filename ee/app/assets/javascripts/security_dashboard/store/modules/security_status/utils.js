@@ -1,33 +1,81 @@
-import {
-  severityLevels,
-  vulnerabilityTypes,
-} from 'ee/security_dashboard/store/modules/security_status/contstants';
+import { __ } from '~/locale';
 
-/**
- * Takes an array of severity levels and returns an object with each
- * severity level as keys and a `projects` property containing an empty array
- *
- * e.g,:
- *
- * {
- *   A: { projects: [] },
- *   B: { projects: [] },
- *   ...
- * }
- *
- * @param severityLevels
- * @returns {Object}
- */
-export const getSeverityGroups = severityLevels =>
-  Object.values(severityLevels).reduce(
-    (groupProjects, levelName) => ({
-      ...groupProjects,
-      [levelName]: {
-        projects: [],
-      },
-    }),
-    {},
-  );
+export const SEVERITY_LEVELS = {
+  A: 'A',
+  B: 'B',
+  D: 'D',
+  E: 'E',
+  F: 'F',
+};
+
+export const VULNERABILITY_TYPES = {
+  critical: 'critical',
+  high: 'high',
+  unknown: 'unknown',
+  medium: 'medium',
+  low: 'low',
+  none: 'none',
+};
+
+const vulnerabilityTypesOrderedBySeverity = [
+  {
+    name: VULNERABILITY_TYPES.critical,
+    displayName: __('critical'),
+  },
+  {
+    name: VULNERABILITY_TYPES.high,
+    displayName: __('high'),
+  },
+  {
+    name: VULNERABILITY_TYPES.unknown,
+    displayName: __('unknown'),
+  },
+  {
+    name: VULNERABILITY_TYPES.medium,
+    displayName: __('medium'),
+  },
+  {
+    name: VULNERABILITY_TYPES.low,
+    displayName: __('low'),
+  },
+  {
+    name: VULNERABILITY_TYPES.none,
+    displayName: __('none'),
+  },
+];
+
+const severityGroups = [
+  {
+    name: SEVERITY_LEVELS.F,
+    displayName: __('F'),
+    description: __('Some description for F'),
+    vulnerabilityTypes: [VULNERABILITY_TYPES.critical],
+  },
+  {
+    name: SEVERITY_LEVELS.E,
+    displayName: __('E'),
+    description: __('Some description for E'),
+    vulnerabilityTypes: [VULNERABILITY_TYPES.high, VULNERABILITY_TYPES.unknown],
+  },
+  {
+    name: SEVERITY_LEVELS.D,
+    displayName: __('D'),
+    description: __('Some description for D'),
+    vulnerabilityTypes: [VULNERABILITY_TYPES.medium],
+  },
+  {
+    name: SEVERITY_LEVELS.B,
+    displayName: __('B'),
+    description: __('Some description for B'),
+    vulnerabilityTypes: [VULNERABILITY_TYPES.low],
+  },
+  {
+    name: SEVERITY_LEVELS.A,
+    displayName: __('A'),
+    description: __('Some description for A'),
+    vulnerabilityTypes: [VULNERABILITY_TYPES.none],
+  },
+];
 
 /**
  * Takes a string `type` and a project containing vulnerability-count properties
@@ -36,105 +84,96 @@ export const getSeverityGroups = severityLevels =>
  * e.g,:
  * -> type = 'critical'; project = { critical_vulnerability_count: 99} => 99
  *
- * @param type
- * @param project
+ * @param name {String}
+ * @param project {Object}
  * @returns {*}
  */
-export const getVulnerabilityCount = (type, project) => project[`${type}_vulnerability_count`];
+export const getVulnerabilityCount = (name, project) => project[`${name}_vulnerability_count`];
 
 /**
- * Checks if a given project has zero vulnerability counts
+ * Takes a project and returns the type of its most severe vulnerability
  *
- * @param project
- * @returns {boolean}
+ * @param project {Object}
+ * @returns {{displayName, name}|*}
  */
-export const hasZeroVulnerabilities = project =>
-  Object.values(vulnerabilityTypes).every(type => getVulnerabilityCount(type, project) === 0);
-
-/**
- * Takes on ore more vulnerability types and returns a function that accepts a project
- * and returns if that project contains any vulnerabilities of the given levels
- *
- * @param types
- * @returns {function(*=): boolean}
- */
-const hasVulnerabilitiesForType = (...types) => project =>
-  types.some(type => getVulnerabilityCount(type, project) > 0);
-
-/**
- * Maps each severity level to a function that returns if the given
- * project matches the given severity level's criteria
- *
- * @type {{[p: string]: function(*=): boolean}}
- */
-export const projectsToSeverityLevel = {
-  [severityLevels.A]: hasZeroVulnerabilities,
-  [severityLevels.B]: hasVulnerabilitiesForType(vulnerabilityTypes.LOW),
-  [severityLevels.D]: hasVulnerabilitiesForType(vulnerabilityTypes.MEDIUM),
-  [severityLevels.E]: hasVulnerabilitiesForType(
-    vulnerabilityTypes.HIGH,
-    vulnerabilityTypes.UNKNOWN,
-  ),
-  [severityLevels.F]: hasVulnerabilitiesForType(vulnerabilityTypes.CRITICAL),
-};
-
-// @TODO - test and docblock
 export const getMostSevereVulnerabilityType = project => {
-  const vulnerabilityTypesBySeverityOrder = [
-    vulnerabilityTypes.CRITICAL,
-    vulnerabilityTypes.HIGH,
-    vulnerabilityTypes.UNKNOWN,
-    vulnerabilityTypes.MEDIUM,
-    vulnerabilityTypes.LOW,
-  ];
+  for (let i = 0; i < vulnerabilityTypesOrderedBySeverity.length; i++) {
+    const typeToCheck = vulnerabilityTypesOrderedBySeverity[i];
 
-  // go through vulnerability types and check if current project has any
-  for (let i = 0; i < vulnerabilityTypesBySeverityOrder.length; i += 1) {
-    const currentTypeToCheck = vulnerabilityTypesBySeverityOrder[i];
-    if (hasVulnerabilitiesForType(currentTypeToCheck)(project)) {
-      return currentTypeToCheck;
+    if (getVulnerabilityCount(typeToCheck.name, project) > 0) {
+      return typeToCheck;
     }
   }
 
-  return '';
-};
-
-// @TODO - test and docblock
-export const getMostSevereVulnerabilityCount = project => {
-  const type = getMostSevereVulnerabilityType(project);
-  // @TODO move this to function and check if we got something
-  const count = project[`${type}_vulnerability_count`];
-
-  return { type, count };
+  return vulnerabilityTypesOrderedBySeverity.find(type => type.name === VULNERABILITY_TYPES.none);
 };
 
 /**
- * Takes a project containing vulnerability counts and returns
- * the severity level it falls under
+ * Takes a severity type and returns the severity level it belongs to
  *
- * @param project
- * @returns {string|*}
+ * @param type {String}
+ * @returns {{displayName, name, description, vulnerabilityTypes}|*|null}
  */
-export const getSeverityLevelForProject = project => {
-  // order is important here - if for example the check for `severityLevel.F` is a match
-  // there is no need to go further down the list
-  const levelsToCheckInOrder = [
-    severityLevels.F,
-    severityLevels.E,
-    severityLevels.D,
-    severityLevels.B,
-    severityLevels.A,
-  ];
+export const getSeverityGroupForType = type => {
+  for (let i = 0; i < severityGroups.length; i++) {
+    const levelToCheck = severityGroups[i];
 
-  for (let i = 0; i < levelsToCheckInOrder.length; i += 1) {
-    const currentLevelToCheck = levelsToCheckInOrder[i];
-    if (projectsToSeverityLevel[currentLevelToCheck](project)) {
-      return currentLevelToCheck;
+    if (levelToCheck.vulnerabilityTypes.includes(type)) {
+      return levelToCheck;
     }
   }
 
-  return '';
+  return null;
 };
+
+/**
+ * Generates an object containing all defined severity groups and the data
+ * that the UI is interested in
+ * @param severityLevels {Array}
+ * @returns {*}
+ */
+export const getSeverityGroups = severityLevels => {
+  const groups = new Map();
+
+  severityLevels.forEach(({ name, displayName, description }) => {
+    groups.set(name, {
+      name: displayName,
+      description,
+      projects: [],
+    });
+  });
+
+  return groups;
+  // severityLevels.reduce(
+  //   (groups, level) => ({
+  //     ...groups,
+  //     [level.name]: {
+  //       name: level.displayName,
+  //       description: level.description,
+  //       projects: [],
+  //     },
+  //   }),
+  //   {},
+  // );
+};
+
+/**
+ * Takes a project and the type of its most severe vulnerability.
+ * Returns * an object containing all the data the UI is interested in
+ *
+ * @param project {Object}
+ * @param mostSevereVulnerabilityType {String}
+ * @returns {{path: *, mostSevere: {name: *, count: *}, name: *, id: *}}
+ */
+export const getProjectData = (project, { displayName, name }) => ({
+  id: project.id,
+  name: project.full_name,
+  path: project.full_path,
+  mostSevere: {
+    name: displayName,
+    count: getVulnerabilityCount(name, project),
+  },
+});
 
 /**
  * Takes an array of projects and returns an object containing
@@ -150,18 +189,21 @@ export const getSeverityLevelForProject = project => {
  * @param {Array} projects
  * @returns {*}
  */
-export const groupBySeverityLevels = projects =>
-  projects.reduce((groups, project) => {
-    const groupForProject = groups[getSeverityLevelForProject(project)];
+export const groupBySeverity = projects => {
+  const groups = getSeverityGroups(severityGroups);
 
-    if (groupForProject) {
-      groups[getSeverityLevelForProject(project)].projects.push({
-        ...project,
-        mostCritical: {
-          ...getMostSevereVulnerabilityCount(project),
-        },
-      });
+  projects.forEach(project => {
+    const mostSevereVulnerabilityType = getMostSevereVulnerabilityType(project);
+    const severityGroup = getSeverityGroupForType(mostSevereVulnerabilityType.name);
+
+    if (!severityGroup) {
+      return;
     }
 
-    return groups;
-  }, getSeverityGroups(severityLevels));
+    groups
+      .get(severityGroup.name)
+      .projects.push(getProjectData(project, mostSevereVulnerabilityType));
+  });
+
+  return Array.from(groups.values());
+};

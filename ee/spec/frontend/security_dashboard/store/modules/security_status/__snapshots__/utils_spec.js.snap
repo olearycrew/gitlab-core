@@ -1,0 +1,102 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SeverityLevels store utils getProjectData takes a project and its most severe vulnerability type and returns the data used to render the project 1`] = `
+Object {
+  "id": "id",
+  "mostSevere": Object {
+    "count": undefined,
+    "name": "foo",
+  },
+  "name": "full_name",
+  "path": "full_path",
+}
+`;
+
+exports[`SeverityLevels store utils groupBySeverity takes an array of projects containing vulnerability data and groups them by severity level 1`] = `
+Array [
+  Object {
+    "description": "Some description for F",
+    "name": "F",
+    "projects": Array [
+      Object {
+        "id": "id",
+        "mostSevere": Object {
+          "count": 1,
+          "name": "critical",
+        },
+        "name": "full_name",
+        "path": "full_path",
+      },
+    ],
+  },
+  Object {
+    "description": "Some description for E",
+    "name": "E",
+    "projects": Array [
+      Object {
+        "id": "id",
+        "mostSevere": Object {
+          "count": 1,
+          "name": "high",
+        },
+        "name": "full_name",
+        "path": "full_path",
+      },
+      Object {
+        "id": "id",
+        "mostSevere": Object {
+          "count": 1,
+          "name": "unknown",
+        },
+        "name": "full_name",
+        "path": "full_path",
+      },
+    ],
+  },
+  Object {
+    "description": "Some description for D",
+    "name": "D",
+    "projects": Array [
+      Object {
+        "id": "id",
+        "mostSevere": Object {
+          "count": 1,
+          "name": "medium",
+        },
+        "name": "full_name",
+        "path": "full_path",
+      },
+    ],
+  },
+  Object {
+    "description": "Some description for B",
+    "name": "B",
+    "projects": Array [
+      Object {
+        "id": "id",
+        "mostSevere": Object {
+          "count": 1,
+          "name": "low",
+        },
+        "name": "full_name",
+        "path": "full_path",
+      },
+    ],
+  },
+  Object {
+    "description": "Some description for A",
+    "name": "A",
+    "projects": Array [
+      Object {
+        "id": "id",
+        "mostSevere": Object {
+          "count": undefined,
+          "name": "none",
+        },
+        "name": "full_name",
+        "path": "full_path",
+      },
+    ],
+  },
+]
+`;
