@@ -37,6 +37,11 @@ export default {
       type: String,
       required: true,
     },
+    vulnerableProjectsEndpoint: {
+      type: String,
+      required: false,
+      default: '',
+    },
     lockToProject: {
       type: Object,
       required: false,
@@ -147,10 +152,12 @@ export default {
         </security-dashboard-table>
       </article>
 
-      <aside v-if="shouldShowChart || true" class="col-xl-5">
+      <aside v-if="shouldShowChart" class="col-xl-5">
         <vulnerability-chart v-if="shouldShowChart" class="mb-3" />
-        <!-- @TODO - inject this-->
-        <vulnerability-severity :endpoint="'/groups/devstuff/-/security/vulnerable_projects'" />
+        <vulnerability-severity
+          v-if="vulnerableProjectsEndpoint"
+          :endpoint="vulnerableProjectsEndpoint"
+        />
       </aside>
     </div>
 
