@@ -1,5 +1,3 @@
-import { __ } from '~/locale';
-
 import {
   severityGroups,
   VULNERABILITY_TYPES,
@@ -58,6 +56,7 @@ export const getSeverityGroupForType = type => {
 /**
  * Generates an object containing all defined severity groups and the data
  * that the UI is interested in
+ *
  * @param severityLevels {Array}
  * @returns {*}
  */
