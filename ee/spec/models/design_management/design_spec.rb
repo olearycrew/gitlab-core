@@ -517,4 +517,34 @@ describe DesignManagement::Design do
       end
     end
   end
+
+  describe 'reference_pattern' do
+    let(:match) { described_class.reference_pattern.match(ref) }
+    let(:ref) { design.to_reference }
+    let(:design) { build(:design, filename: filename) }
+
+    context 'simple_file_name' do
+      let(:filename) { 'simple-file-name.jpg' }
+
+      it 'matches :simple_file_name' do
+        expect(match[:simple_file_name]).to eq(filename)
+      end
+    end
+
+    context 'quoted_file_name' do
+      let(:filename) { 'simple "file" name.jpg' }
+
+      it 'matches :simple_file_name' do
+        expect(match[:escaped_filename].gsub(/\\"/, '"')).to eq(filename)
+      end
+    end
+
+    context 'Base64 name' do
+      let(:filename) { '<>.png' }
+
+      it 'matches base_64_encoded_name' do
+        expect(Base64.decode64(match[:base_64_encoded_name])).to eq(filename)
+      end
+    end
+  end
 end
