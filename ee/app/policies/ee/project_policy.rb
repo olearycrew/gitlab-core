@@ -167,7 +167,7 @@ module EE
 
       rule { dependency_list_enabled & can?(:download_code) }.enable :read_dependencies
 
-      rule { license_management_enabled & can?(:read_project) }.enable :read_licenses
+      rule { license_management_enabled & can?(:download_code) }.enable :read_licenses
 
       rule { repository_mirrors_enabled & ((mirror_available & can?(:admin_project)) | admin) }.enable :admin_mirror
 

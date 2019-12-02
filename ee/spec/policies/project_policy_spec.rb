@@ -813,10 +813,6 @@ describe ProjectPolicy do
 
   describe 'read_licenses' do
     context 'when license management feature available' do
-      before do
-        stub_licensed_features(license_management: true)
-      end
-
       context 'with public project' do
         let(:current_user) { create(:user) }
 
@@ -828,12 +824,18 @@ describe ProjectPolicy do
       context 'with private project' do
         let(:project) { create(:project, :private, namespace: owner.namespace) }
 
-        where(role: %w[admin owner maintainer developer reporter guest])
+        where(role: %w[admin owner maintainer developer reporter])
 
         with_them do
           let(:current_user) { public_send(role) }
 
           it { is_expected.to be_allowed(:read_licenses) }
+        end
+
+        context 'with guest' do
+          let(:current_user) { guest }
+
+          it { is_expected.to be_disallowed(:read_licenses) }
         end
 
         context 'with not member' do
@@ -851,6 +853,10 @@ describe ProjectPolicy do
     end
 
     context 'when license management feature in not available' do
+      before do
+        stub_licensed_features(license_management: false)
+      end
+
       let(:current_user) { admin }
 
       it { is_expected.to be_disallowed(:read_licenses) }
