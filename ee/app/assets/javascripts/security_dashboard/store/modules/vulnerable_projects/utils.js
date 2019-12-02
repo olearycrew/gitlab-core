@@ -60,7 +60,7 @@ export const getSeverityGroupForType = type => {
  * @param severityLevels {Array}
  * @returns {*}
  */
-export const getSeverityGroups = severityLevels => {
+export const getSeverityGroupsMap = severityLevels => {
   const groups = new Map();
 
   severityLevels.forEach(({ type, name, description }) => {
@@ -107,7 +107,7 @@ export const getProjectData = (project, { type, name }) => ({
  * @returns {*}
  */
 export const groupBySeverityLevel = projects => {
-  const groups = getSeverityGroups(severityGroups);
+  const groupsMap = getSeverityGroupsMap(severityGroups);
 
   projects.forEach(project => {
     const mostSevereVulnerabilityType = getMostSevereVulnerabilityType(project);
@@ -117,10 +117,10 @@ export const groupBySeverityLevel = projects => {
       return;
     }
 
-    groups
+    groupsMap
       .get(severityGroup.type)
       .projects.push(getProjectData(project, mostSevereVulnerabilityType));
   });
 
-  return Array.from(groups.values());
+  return Array.from(groupsMap.values());
 };

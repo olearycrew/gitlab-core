@@ -2,7 +2,7 @@ import {
   getMostSevereVulnerabilityType,
   getProjectData,
   getSeverityGroupForType,
-  getSeverityGroups,
+  getSeverityGroupsMap,
   getVulnerabilityCount,
   groupBySeverityLevel,
 } from 'ee/security_dashboard/store/modules/vulnerable_projects/utils';
@@ -84,7 +84,7 @@ describe('SeverityLevels store utils', () => {
     );
   });
 
-  describe('getSeverityGroups', () => {
+  describe('getSeverityGroupsMap', () => {
     it("returns a map with the given severity levels containing an empty 'projects' array", () => {
       const severityLevels = [
         {
@@ -99,7 +99,7 @@ describe('SeverityLevels store utils', () => {
         },
       ];
 
-      const groups = getSeverityGroups(severityLevels);
+      const groups = getSeverityGroupsMap(severityLevels);
 
       expect(groups.get('fooName')).toStrictEqual({
         name: 'fooName',
