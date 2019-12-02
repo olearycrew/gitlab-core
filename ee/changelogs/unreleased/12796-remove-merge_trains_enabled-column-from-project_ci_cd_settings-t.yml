@@ -1,0 +1,5 @@
+---
+title: Remove `project_ci_cd_settings.merge_trains_enabled` column
+merge_request: https://gitlab.com/gitlab-org/gitlab/merge_requests/19695
+author:
+type: removed

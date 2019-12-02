@@ -11,7 +11,7 @@ describe MergeTrains::RefreshMergeRequestService do
   before do
     project.add_maintainer(maintainer)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
-    project.update!(merge_pipelines_enabled: true, merge_trains_enabled: true)
+    project.update!(merge_pipelines_enabled: true)
   end
 
   describe '#execute' do
@@ -82,7 +82,7 @@ describe MergeTrains::RefreshMergeRequestService do
 
     context 'when merge train project configuration is disabled' do
       before do
-        project.update!(merge_trains_enabled: false)
+        ::Feature.disable(:merge_trains_enabled, project)
       end
 
       it_behaves_like 'drops the merge request from the merge train' do
@@ -90,7 +90,8 @@ describe MergeTrains::RefreshMergeRequestService do
       end
 
       after do
-        project.update!(merge_trains_enabled: true)
+        stub_licensed_features(merge_pipelines: true, merge_trains: false)
+        project.update!(merge_pipelines_enabled: true)
       end
     end
 
