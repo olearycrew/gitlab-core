@@ -5,17 +5,17 @@ Object {
   "id": "id",
   "mostSevere": Object {
     "count": undefined,
-    "name": "foo",
+    "name": "bar",
   },
   "name": "full_name",
   "path": "full_path",
 }
 `;
 
-exports[`SeverityLevels store utils groupBySeverity takes an array of projects containing vulnerability data and groups them by severity level 1`] = `
+exports[`SeverityLevels store utils groupBySeverityLevel takes an array of projects containing vulnerability data and groups them by severity level 1`] = `
 Array [
   Object {
-    "description": "Some description for F",
+    "description": "Critical vulnerabilities present",
     "name": "F",
     "projects": Array [
       Object {
@@ -30,7 +30,7 @@ Array [
     ],
   },
   Object {
-    "description": "Some description for E",
+    "description": "High or unknown vulnerabilities present",
     "name": "E",
     "projects": Array [
       Object {
@@ -54,7 +54,7 @@ Array [
     ],
   },
   Object {
-    "description": "Some description for D",
+    "description": "Medium vulnerabilities present",
     "name": "D",
     "projects": Array [
       Object {
@@ -69,7 +69,7 @@ Array [
     ],
   },
   Object {
-    "description": "Some description for B",
+    "description": "Low vulnerabilities present",
     "name": "B",
     "projects": Array [
       Object {
@@ -84,7 +84,7 @@ Array [
     ],
   },
   Object {
-    "description": "Some description for A",
+    "description": "No vulnerabilities present",
     "name": "A",
     "projects": Array [
       Object {

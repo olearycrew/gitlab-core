@@ -4,14 +4,14 @@ import mediator from './plugins/mediator';
 
 import filters from './modules/filters/index';
 import vulnerabilities from './modules/vulnerabilities/index';
-import securityStatus from './modules/security_status/index';
+import vulnerableProjects from './modules/vulnerable_projects/index';
 
 Vue.use(Vuex);
 
 export default ({ plugins = [] } = {}) =>
   new Vuex.Store({
     modules: {
-      securityStatus,
+      vulnerableProjects,
       filters,
       vulnerabilities,
     },

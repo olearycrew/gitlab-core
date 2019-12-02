@@ -1,8 +1,8 @@
 import {
   severityGroups,
-  VULNERABILITY_TYPES,
+  SEVERITY_LEVEL_TYPES,
   vulnerabilityTypesOrderedBySeverity,
-} from 'ee/security_dashboard/store/modules/security_status/constants';
+} from 'ee/security_dashboard/store/modules/vulnerable_projects/constants';
 
 /**
  * Takes a string `type` and a project containing vulnerability-count properties
@@ -11,41 +11,41 @@ import {
  * e.g,:
  * -> type = 'critical'; project = { critical_vulnerability_count: 99} => 99
  *
- * @param name {String}
+ * @param type {String}
  * @param project {Object}
  * @returns {*}
  */
-export const getVulnerabilityCount = (name, project) => project[`${name}_vulnerability_count`];
+export const getVulnerabilityCount = (type, project) => project[`${type}_vulnerability_count`];
 
 /**
  * Takes a project and returns the type of its most severe vulnerability
  *
  * @param project {Object}
- * @returns {{displayName, name}|*}
+ * @returns {{type, name}|*}
  */
 export const getMostSevereVulnerabilityType = project => {
   for (let i = 0; i < vulnerabilityTypesOrderedBySeverity.length; i += 1) {
     const typeToCheck = vulnerabilityTypesOrderedBySeverity[i];
 
-    if (getVulnerabilityCount(typeToCheck.name, project) > 0) {
+    if (getVulnerabilityCount(typeToCheck.type, project) > 0) {
       return typeToCheck;
     }
   }
 
-  return vulnerabilityTypesOrderedBySeverity.find(type => type.name === VULNERABILITY_TYPES.none);
+  return vulnerabilityTypesOrderedBySeverity.find(({ type }) => type === SEVERITY_LEVEL_TYPES.none);
 };
 
 /**
  * Takes a severity type and returns the severity level it belongs to
  *
  * @param type {String}
- * @returns {{displayName, name, description, vulnerabilityTypes}|*|null}
+ * @returns {{type, name, description, vulnerabilityTypes}|*|null}
  */
 export const getSeverityGroupForType = type => {
-  for (let i = 0; i < severityGroups.length; i++) {
+  for (let i = 0; i < severityGroups.length; i += 1) {
     const levelToCheck = severityGroups[i];
 
-    if (levelToCheck.vulnerabilityTypes.includes(type)) {
+    if (levelToCheck.severityLevelsIncluded.includes(type)) {
       return levelToCheck;
     }
   }
@@ -63,9 +63,9 @@ export const getSeverityGroupForType = type => {
 export const getSeverityGroups = severityLevels => {
   const groups = new Map();
 
-  severityLevels.forEach(({ name, displayName, description }) => {
-    groups.set(name, {
-      name: displayName,
+  severityLevels.forEach(({ type, name, description }) => {
+    groups.set(type, {
+      name,
       description,
       projects: [],
     });
@@ -82,13 +82,13 @@ export const getSeverityGroups = severityLevels => {
  * @param mostSevereVulnerabilityType {String}
  * @returns {{path: *, mostSevere: {name: *, count: *}, name: *, id: *}}
  */
-export const getProjectData = (project, { displayName, name }) => ({
+export const getProjectData = (project, { type, name }) => ({
   id: project.id,
   name: project.full_name,
   path: project.full_path,
   mostSevere: {
-    name: displayName,
-    count: getVulnerabilityCount(name, project),
+    name,
+    count: getVulnerabilityCount(type, project),
   },
 });
 
@@ -106,19 +106,19 @@ export const getProjectData = (project, { displayName, name }) => ({
  * @param {Array} projects
  * @returns {*}
  */
-export const groupBySeverity = projects => {
+export const groupBySeverityLevel = projects => {
   const groups = getSeverityGroups(severityGroups);
 
   projects.forEach(project => {
     const mostSevereVulnerabilityType = getMostSevereVulnerabilityType(project);
-    const severityGroup = getSeverityGroupForType(mostSevereVulnerabilityType.name);
+    const severityGroup = getSeverityGroupForType(mostSevereVulnerabilityType.type);
 
     if (!severityGroup) {
       return;
     }
 
     groups
-      .get(severityGroup.name)
+      .get(severityGroup.type)
       .projects.push(getProjectData(project, mostSevereVulnerabilityType));
   });
 

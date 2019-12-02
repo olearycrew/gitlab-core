@@ -4,8 +4,8 @@ import {
   getSeverityGroupForType,
   getSeverityGroups,
   getVulnerabilityCount,
-  groupBySeverity,
-} from 'ee/security_dashboard/store/modules/security_status/utils';
+  groupBySeverityLevel,
+} from 'ee/security_dashboard/store/modules/vulnerable_projects/utils';
 
 const createMockProjectWithZeroVulnerabilities = () => ({
   id: 'id',
@@ -36,21 +36,21 @@ const createMockProjectWithOneVulnerability = createMockProjectWithVulnerabiliti
 describe('SeverityLevels store utils', () => {
   describe('getMostSevereVulnerabilityType', () => {
     it.each`
-      vulnerabilityTypesInProject                         | expectedType
-      ${['critical', 'high', 'unknown', 'medium', 'low']} | ${'critical'}
-      ${['high', 'unknown', 'medium', 'low']}             | ${'high'}
-      ${['unknown', 'medium', 'low']}                     | ${'unknown'}
-      ${['medium', 'low']}                                | ${'medium'}
-      ${['low']}                                          | ${'low'}
-      ${[]}                                               | ${'none'}
+      vulnerabilityTypesInProject                         | expectedType  | expectedName
+      ${['critical', 'high', 'unknown', 'medium', 'low']} | ${'critical'} | ${'critical'}
+      ${['high', 'unknown', 'medium', 'low']}             | ${'high'}     | ${'high'}
+      ${['unknown', 'medium', 'low']}                     | ${'unknown'}  | ${'unknown'}
+      ${['medium', 'low']}                                | ${'medium'}   | ${'medium'}
+      ${['low']}                                          | ${'low'}      | ${'low'}
+      ${[]}                                               | ${'none'}     | ${'none'}
     `(
-      "given $vulnerabilityTypesInProject returns '$expectedType'",
-      ({ vulnerabilityTypesInProject, expectedType }) => {
+      'given $vulnerabilityTypesInProject returns an object containing the name and type of the most severe vulnerability',
+      ({ vulnerabilityTypesInProject, expectedType, expectedName }) => {
         const mockProject = createMockProjectWithOneVulnerability(...vulnerabilityTypesInProject);
 
         expect(getMostSevereVulnerabilityType(mockProject)).toEqual({
-          displayName: expectedType,
           name: expectedType,
+          type: expectedName,
         });
       },
     );
@@ -88,13 +88,13 @@ describe('SeverityLevels store utils', () => {
     it("returns a map with the given severity levels containing an empty 'projects' array", () => {
       const severityLevels = [
         {
+          type: 'fooName',
           name: 'fooName',
-          displayName: 'fooDisplayName',
           description: 'fooDescription',
         },
         {
+          type: 'barName',
           name: 'barName',
-          displayName: 'barDisplayName',
           description: 'barDescription',
         },
       ];
@@ -102,13 +102,13 @@ describe('SeverityLevels store utils', () => {
       const groups = getSeverityGroups(severityLevels);
 
       expect(groups.get('fooName')).toStrictEqual({
-        name: 'fooDisplayName',
+        name: 'fooName',
         description: 'fooDescription',
         projects: [],
       });
 
       expect(groups.get('barName')).toStrictEqual({
-        name: 'barDisplayName',
+        name: 'barName',
         description: 'barDescription',
         projects: [],
       });
@@ -133,7 +133,7 @@ describe('SeverityLevels store utils', () => {
     );
   });
 
-  describe('groupBySeverity', () => {
+  describe('groupBySeverityLevel', () => {
     it('takes an array of projects containing vulnerability data and groups them by severity level', () => {
       const projectsWithVulnerabilities = [
         createMockProjectWithOneVulnerability('critical'),
@@ -144,7 +144,7 @@ describe('SeverityLevels store utils', () => {
         createMockProjectWithZeroVulnerabilities(),
       ];
 
-      const projectsGroupedBySeverityLevel = groupBySeverity(
+      const projectsGroupedBySeverityLevel = groupBySeverityLevel(
         Object.values(projectsWithVulnerabilities),
       );
 
