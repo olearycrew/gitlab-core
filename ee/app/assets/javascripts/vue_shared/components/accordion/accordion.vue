@@ -1,11 +1,5 @@
 <script>
 export default {
-  provide() {
-    return {
-      contentMaxHeight: () => this.contentMaxHeight,
-      isLoading: () => this.isLoading,
-    };
-  },
   props: {
     isLoading: {
       type: Boolean,
@@ -28,8 +22,7 @@ export default {
     closeAllOtherChildren(eventTrigger) {
       this.$children.forEach(child => {
         if (child !== eventTrigger) {
-          // @TODO - add collapse method to items
-          child.isExpanded = false;
+          child.collapse();
         }
       });
     },

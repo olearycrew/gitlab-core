@@ -72,9 +72,25 @@ describe('AccordionItem component', () => {
 
     it('contains a default slot', () => {
       factory({ defaultSlot: `<div class='foo' />` });
-
       expect(wrapper.find(`.foo`).exists()).toBe(true);
     });
+
+    it.each([true, false])(
+      'passes the "isExpanded" and "isDisabled" state to the title slot',
+      state => {
+        const titleSlot = jest.fn();
+
+        factory({ propsData: { disabled: state }, titleSlot });
+        wrapper.vm.isExpanded = state;
+
+        return wrapper.vm.$nextTick().then(() => {
+          expect(titleSlot).toHaveBeenCalledWith({
+            isExpanded: state,
+            isDisabled: state,
+          });
+        });
+      },
+    );
   });
 
   describe('collapsing and expanding', () => {
@@ -94,13 +110,23 @@ describe('AccordionItem component', () => {
       });
     });
 
-    it("emits a 'toggle' event containing the trigger item as a payload", () => {
+    it('emits a "toggle" event containing the trigger item as a payload', () => {
       expansionTrigger().trigger('click');
 
       const rootWrapper = createWrapper(wrapper.vm.$root);
 
       expect(rootWrapper.emitted('toggle').length).toBe(1);
       expect(rootWrapper.emitted('toggle')[0][0]).toEqual(wrapper.vm);
+    });
+
+    it('contains a collapse method that collapses', () => {
+      wrapper.setData({ isExpanded: true });
+
+      wrapper.vm.collapse();
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.vm.isExpanded).toBe(false);
+      });
     });
   });
 
@@ -118,7 +144,7 @@ describe('AccordionItem component', () => {
       expect(contentContainer().attributes('id')).toBe('mockUniqueId');
     });
 
-    it("has a trigger element that has an 'aria-expanded' attribute set, to show if it is expanded or collapsed", () => {
+    it('has a trigger element that has an "aria-expanded" attribute set, to show if it is expanded or collapsed', () => {
       expect(expansionTrigger().attributes('aria-expanded')).toBeFalsy();
 
       wrapper.setData({ isExpanded: true });
@@ -128,14 +154,14 @@ describe('AccordionItem component', () => {
       });
     });
 
-    it("has a trigger element that has a 'aria-controls' attribute, which points to the content element", () => {
+    it('has a trigger element that has a "aria-controls" attribute, which points to the content element', () => {
       expect(expansionTrigger().attributes('aria-controls')).toBeTruthy();
       expect(expansionTrigger().attributes('aria-controls')).toBe(
         contentContainer().attributes('id'),
       );
     });
 
-    it("has a content element that has a 'aria-labelledby' attribute, which points to the trigger element", () => {
+    it('has a content element that has a "aria-labelledby" attribute, which points to the trigger element', () => {
       expect(contentContainer().attributes('aria-labelledby')).toBeTruthy();
       expect(contentContainer().attributes('aria-labelledby')).toBe(
         expansionTrigger().attributes('id'),

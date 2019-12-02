@@ -6,7 +6,6 @@ const localVue = createLocalVue();
 describe('Accordion component', () => {
   const mockAccordionItem = () => ({
     name: 'mock-accordion-item',
-    inject: ['contentMaxHeight', 'isLoading'],
     render() {},
     data() {
       return { isExpanded: false };
@@ -52,31 +51,6 @@ describe('Accordion component', () => {
 
     expect(accordionItems().length).toBe(numberOfItems);
   });
-
-  it.each`
-    propName              | propValue
-    ${'contentMaxHeight'} | ${'200px'}
-    ${'isLoading'}        | ${true}
-  `(
-    "passes the given prop '$propName' to its children via provide / inject",
-    ({ propName, propValue }) => {
-      expect(
-        accordionItems()
-          .at(0)
-          .vm[propName](),
-      ).toBeFalsy();
-
-      wrapper.setProps({ [propName]: propValue });
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(
-          accordionItems()
-            .at(0)
-            .vm[propName](),
-        ).toBe(propValue);
-      });
-    },
-  );
 
   it.each`
     emittingChildIndex | childAtIndexZeroIsExpanded | childAtIndexOneIsExpanded | childAtIndexTwoIsExpanded

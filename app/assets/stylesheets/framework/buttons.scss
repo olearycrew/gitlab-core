@@ -521,7 +521,6 @@ fieldset[disabled] .btn,
 }
 
 [readonly] {
-  // @TODO - note in MR why this is happening, specificity
   cursor: default !important;
 }
 

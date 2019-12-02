@@ -58,9 +58,19 @@ export default {
   },
   methods: {
     handleClick() {
-      this.isExpanded = !this.isExpanded;
+      if (this.isExpanded) {
+        this.collapse();
+      } else {
+        this.expand();
+      }
       this.$root.$emit('toggle', this);
     },
+    expand() {
+      this.isExpanded = true;
+    },
+    collapse() {
+      this.isExpanded = false;
+    }
   },
 };
 </script>
