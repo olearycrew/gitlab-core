@@ -15,7 +15,7 @@ Object {
 exports[`SeverityLevels store utils groupBySeverityLevel takes an array of projects containing vulnerability data and groups them by severity level 1`] = `
 Array [
   Object {
-    "description": "Critical vulnerabilities present",
+    "description": "Projects with critical vulnerabilities",
     "name": "F",
     "projects": Array [
       Object {
@@ -28,9 +28,10 @@ Array [
         "path": "full_path",
       },
     ],
+    "warning": "Critical vulnerabilities present",
   },
   Object {
-    "description": "High or unknown vulnerabilities present",
+    "description": "Projects with high or unknown vulnerabilities",
     "name": "D",
     "projects": Array [
       Object {
@@ -52,9 +53,10 @@ Array [
         "path": "full_path",
       },
     ],
+    "warning": "High or unknown vulnerabilities present",
   },
   Object {
-    "description": "Medium vulnerabilities present",
+    "description": "Projects with medium vulnerabilities",
     "name": "C",
     "projects": Array [
       Object {
@@ -67,9 +69,10 @@ Array [
         "path": "full_path",
       },
     ],
+    "warning": "Medium vulnerabilities present",
   },
   Object {
-    "description": "Low vulnerabilities present",
+    "description": "Projects with low vulnerabilities",
     "name": "B",
     "projects": Array [
       Object {
@@ -82,9 +85,10 @@ Array [
         "path": "full_path",
       },
     ],
+    "warning": "Low vulnerabilities present",
   },
   Object {
-    "description": "No vulnerabilities present",
+    "description": "Projects with no vulnerabilities and security scanning enabled",
     "name": "A",
     "projects": Array [
       Object {
@@ -97,6 +101,7 @@ Array [
         "path": "full_path",
       },
     ],
+    "warning": "No vulnerabilities present",
   },
 ]
 `;

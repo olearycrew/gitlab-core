@@ -91,11 +91,13 @@ describe('SeverityLevels store utils', () => {
           type: 'foo',
           name: 'fooName',
           description: 'fooDescription',
+          warning: 'fooWarning',
         },
         {
           type: 'bar',
           name: 'barName',
           description: 'barDescription',
+          warning: 'barWarning',
         },
       ];
 
@@ -103,11 +105,13 @@ describe('SeverityLevels store utils', () => {
         foo: {
           name: 'fooName',
           description: 'fooDescription',
+          warning: 'fooWarning',
           projects: [],
         },
         bar: {
           name: 'barName',
           description: 'barDescription',
+          warning: 'barWarning',
           projects: [],
         },
       });

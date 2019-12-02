@@ -25,13 +25,15 @@ export default {
     maxHeight: {
       type: String,
       required: false,
-      default: ''
+      default: '',
     },
     isLoading: {
       type: Boolean,
       required: false,
-      default: false,
-    }
+      default() {
+        return this.$parent.isLoading;
+      },
+    },
   },
   data() {
     return {
@@ -54,7 +56,7 @@ export default {
   },
   created() {
     this.buttonId = accordionUniqueId('trigger');
-    this.contentId = accordionUniqueId('content');
+    this.contentContainerId = accordionUniqueId('content-container');
   },
   methods: {
     handleClick() {
@@ -70,7 +72,7 @@ export default {
     },
     collapse() {
       this.isExpanded = false;
-    }
+    },
   },
 };
 </script>
@@ -86,7 +88,7 @@ export default {
           :readonly="isDisabled"
           type="button"
           :aria-expanded="isExpanded"
-          :aria-controls="contentId"
+          :aria-controls="contentContainerId"
           class="btn-transparent border-0 rounded-0 w-100 p-0 text-left"
           @click="handleClick"
         >
@@ -103,13 +105,13 @@ export default {
       </div>
       <div
         v-show="isExpanded"
-        :id="contentId"
-        ref="content"
+        ref="contentContainer"
+        :id="contentContainerId"
         :aria-labelledby="buttonId"
-        :style="contentStyles"
         role="region"
       >
-        <slot name="default"></slot>
+        <slot name="subTitle"></slot>
+        <div ref="content" :style="contentStyles"><slot name="default"></slot></div>
       </div>
     </template>
     <div v-else ref="loadingIndicator" class="d-flex p-2">

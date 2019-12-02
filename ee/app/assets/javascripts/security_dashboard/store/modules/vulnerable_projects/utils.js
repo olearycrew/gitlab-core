@@ -5,7 +5,7 @@ import {
 } from 'ee/security_dashboard/store/modules/vulnerable_projects/constants';
 
 /**
- * Takes a string `type` and a project containing vulnerability-count properties
+ * Takes a string (type) and a project-object containing vulnerability-count properties
  * and returns the count for the given type
  *
  * e.g,:
@@ -18,7 +18,7 @@ import {
 export const getVulnerabilityCount = (type, project) => project[`${type}_vulnerability_count`];
 
 /**
- * Takes a project and returns the type of its most severe vulnerability
+ * Takes a project and returns the its most severe vulnerability type
  *
  * @param project {Object}
  * @returns {{type, name}|*}
@@ -36,7 +36,7 @@ export const getMostSevereVulnerabilityType = project => {
 };
 
 /**
- * Takes a severity type and returns the severity level it belongs to
+ * Takes a severity type and returns the severity group it falls under
  *
  * @param type {String}
  * @returns {{type, name, description, vulnerabilityTypes}|*|null}
@@ -54,19 +54,19 @@ export const getSeverityGroupForType = type => {
 };
 
 /**
- * Generates an object containing all defined severity groups and the data
- * that the UI is interested in
+ * Generates an object containing all defined severity groups
  *
  * @param groups {Array}
  * @returns {*}
  */
 export const getSeverityGroupsData = groups =>
   groups.reduce(
-    (groupsData, { type, name, description }) => ({
+    (groupsData, { type, name, description, warning }) => ({
       ...groupsData,
       [type]: {
         name,
         description,
+        warning,
         projects: [],
       },
     }),
@@ -75,7 +75,8 @@ export const getSeverityGroupsData = groups =>
 
 /**
  * Takes a project and the type of its most severe vulnerability.
- * Returns * an object containing all the data the UI is interested in
+ * Transforms properties into camelcase and adds a property that contains
+ * the the type and count of its most sever vulnerability type
  *
  * @param project {Object}
  * @param mostSevereVulnerabilityType {String}

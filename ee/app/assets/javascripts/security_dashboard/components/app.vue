@@ -75,8 +75,14 @@ export default {
     isLockedToProject() {
       return this.lockToProject !== null;
     },
+    shouldShowAside() {
+      return this.shouldShowChart || this.shouldShowVulnerabilitySeverities;
+    },
     shouldShowChart() {
       return Boolean(this.vulnerabilitiesHistoryEndpoint);
+    },
+    shouldShowVulnerabilitySeverities() {
+      return Boolean(this.vulnerableProjectsEndpoint);
     },
     shouldShowCountList() {
       return this.isLockedToProject && Boolean(this.vulnerabilitiesCountEndpoint);
@@ -152,10 +158,10 @@ export default {
         </security-dashboard-table>
       </article>
 
-      <aside v-if="shouldShowChart" class="col-xl-5">
+      <aside v-if="shouldShowAside" class="col-xl-5">
         <vulnerability-chart v-if="shouldShowChart" class="mb-3" />
         <vulnerability-severity
-          v-if="vulnerableProjectsEndpoint"
+          v-if="shouldShowVulnerabilitySeverities"
           :endpoint="vulnerableProjectsEndpoint"
         />
       </aside>

@@ -24,9 +24,10 @@ describe('AccordionItem component', () => {
     });
   };
 
-  const contentContainer = () => wrapper.find({ ref: 'content' });
-  const expansionTrigger = () => wrapper.find({ ref: 'expansionTrigger' });
   const loadingIndicator = () => wrapper.find({ ref: 'loadingIndicator' });
+  const expansionTrigger = () => wrapper.find({ ref: 'expansionTrigger' });
+  const contentContainer = () => wrapper.find({ ref: 'contentContainer' });
+  const content = () => wrapper.find({ ref: 'content' });
 
   afterEach(() => {
     wrapper.destroy();
@@ -56,7 +57,7 @@ describe('AccordionItem component', () => {
       wrapper.setProps({ maxHeight: '200px' });
 
       return wrapper.vm.$nextTick().then(() => {
-        expect(contentContainer().element.style.maxHeight).toBe('200px');
+        expect(content().element.style.maxHeight).toBe('200px');
       });
     });
   });
@@ -140,7 +141,7 @@ describe('AccordionItem component', () => {
     });
 
     it('contains a expansion trigger element with a unique, namespaced id', () => {
-      expect(uniqueId).toHaveBeenCalledWith('gl-accordion-content-');
+      expect(uniqueId).toHaveBeenCalledWith('gl-accordion-content-container-');
       expect(contentContainer().attributes('id')).toBe('mockUniqueId');
     });
 
