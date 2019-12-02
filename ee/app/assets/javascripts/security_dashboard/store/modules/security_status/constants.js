@@ -1,6 +1,6 @@
 import { __ } from '~/locale';
 
-export const SEVERITY_LEVELS = {
+export const SEVERITY_GROUPS = {
   A: 'A',
   B: 'B',
   D: 'D',
@@ -46,31 +46,31 @@ export const vulnerabilityTypesOrderedBySeverity = [
 
 export const severityGroups = [
   {
-    name: SEVERITY_LEVELS.F,
+    name: SEVERITY_GROUPS.F,
     displayName: __('F'),
     description: __('Some description for F'),
     vulnerabilityTypes: [VULNERABILITY_TYPES.critical],
   },
   {
-    name: SEVERITY_LEVELS.E,
+    name: SEVERITY_GROUPS.E,
     displayName: __('E'),
     description: __('Some description for E'),
     vulnerabilityTypes: [VULNERABILITY_TYPES.high, VULNERABILITY_TYPES.unknown],
   },
   {
-    name: SEVERITY_LEVELS.D,
+    name: SEVERITY_GROUPS.D,
     displayName: __('D'),
     description: __('Some description for D'),
     vulnerabilityTypes: [VULNERABILITY_TYPES.medium],
   },
   {
-    name: SEVERITY_LEVELS.B,
+    name: SEVERITY_GROUPS.B,
     displayName: __('B'),
     description: __('Some description for B'),
     vulnerabilityTypes: [VULNERABILITY_TYPES.low],
   },
   {
-    name: SEVERITY_LEVELS.A,
+    name: SEVERITY_GROUPS.A,
     displayName: __('A'),
     description: __('Some description for A'),
     vulnerabilityTypes: [VULNERABILITY_TYPES.none],

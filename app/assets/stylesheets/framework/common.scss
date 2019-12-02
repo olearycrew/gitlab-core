@@ -574,6 +574,28 @@ img.emoji {
 .gl-font-size-28 { font-size: $gl-font-size-28; }
 .gl-font-size-42 { font-size: $gl-font-size-42; }
 
+// Colors for vulnerability severities
+// critical
+.gl-bg-red-100 { background-color: $red-100; }
+.gl-text-red-700 { color: $red-700; }
+
+// high
+.gl-bg-orange-100 { background-color: $orange-100; }
+.gl-text-orange-700 { color: $orange-700; }
+
+// medium
+.gl-bg-purple-light { background-color: $purple-light; }
+.gl-text-purple { color: $purple; }
+
+// low
+.gl-bg-gray-100 { background-color: $gray-100; }
+.gl-text-gray-800 { color: $gray-800; }
+
+// none
+.gl-bg-green-100 { background-color: $green-100; }
+.gl-text-green-700 { color: $green-700; }
+
+
 .border-section {
   @include gl-py-6;
   @include gl-m-0;
