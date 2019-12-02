@@ -7,7 +7,6 @@ import Icon from '~/vue_shared/components/icon.vue';
 const accordionUniqueId = name => uniqueId(`gl-accordion-${name}-`);
 
 export default {
-  inject: ['contentMaxHeight', 'isLoading'],
   components: {
     GlSkeletonLoader,
     Icon,
@@ -43,14 +42,14 @@ export default {
         overflow: 'auto',
       };
     },
+    isLoading() {
+      return this.$parent.isLoading;
+    },
     isDisabled() {
       return this.disabled || !this.hasContent;
     },
     hasContent() {
       return this.$slots.default;
-    },
-    hasTitleSubheader() {
-      return this.$slots.titleSubheader;
     },
   },
   created() {
@@ -68,7 +67,7 @@ export default {
 
 <template>
   <li class="list-group-item p-0">
-    <template v-if="!isLoading()">
+    <template v-if="!isLoading">
       <div class="d-flex align-items-stretch" :class="{ 'bg-warning': !hasContent }">
         <button
           :id="buttonId"

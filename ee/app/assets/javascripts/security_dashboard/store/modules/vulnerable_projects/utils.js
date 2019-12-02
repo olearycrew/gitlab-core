@@ -57,22 +57,21 @@ export const getSeverityGroupForType = type => {
  * Generates an object containing all defined severity groups and the data
  * that the UI is interested in
  *
- * @param severityLevels {Array}
+ * @param groups {Array}
  * @returns {*}
  */
-export const getSeverityGroupsMap = severityLevels => {
-  const groups = new Map();
-
-  severityLevels.forEach(({ type, name, description }) => {
-    groups.set(type, {
-      name,
-      description,
-      projects: [],
-    });
-  });
-
-  return groups;
-};
+export const getSeverityGroupsData = groups =>
+  groups.reduce(
+    (groupsData, { type, name, description }) => ({
+      ...groupsData,
+      [type]: {
+        name,
+        description,
+        projects: [],
+      },
+    }),
+    {},
+  );
 
 /**
  * Takes a project and the type of its most severe vulnerability.
@@ -104,10 +103,10 @@ export const getProjectData = (project, { type, name }) => ({
  * }
  *
  * @param {Array} projects
- * @returns {*}
+ * @returns {Array}
  */
 export const groupBySeverityLevel = projects => {
-  const groupsMap = getSeverityGroupsMap(severityGroups);
+  const groupsData = getSeverityGroupsData(severityGroups);
 
   projects.forEach(project => {
     const mostSevereVulnerabilityType = getMostSevereVulnerabilityType(project);
@@ -117,10 +116,10 @@ export const groupBySeverityLevel = projects => {
       return;
     }
 
-    groupsMap
-      .get(severityGroup.type)
-      .projects.push(getProjectData(project, mostSevereVulnerabilityType));
+    groupsData[severityGroup.type].projects.push(
+      getProjectData(project, mostSevereVulnerabilityType),
+    );
   });
 
-  return Array.from(groupsMap.values());
+  return Object.values(groupsData);
 };
