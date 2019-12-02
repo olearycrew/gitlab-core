@@ -25,10 +25,13 @@ export default {
     maxHeight: {
       type: String,
       required: false,
-      default() {
-        return this.$parent.contentMaxHeight;
-      },
+      default: ''
     },
+    isLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    }
   },
   data() {
     return {
@@ -42,14 +45,11 @@ export default {
         overflow: 'auto',
       };
     },
-    isLoading() {
-      return this.$parent.isLoading;
-    },
     isDisabled() {
       return this.disabled || !this.hasContent;
     },
     hasContent() {
-      return this.$slots.default;
+      return this.$scopedSlots.default;
     },
   },
   created() {
