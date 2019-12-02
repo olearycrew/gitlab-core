@@ -1,11 +1,11 @@
 import { __ } from '~/locale';
 
 export const SEVERITY_GROUP_TYPES = {
-  A: 'A',
-  B: 'B',
-  D: 'D',
-  E: 'E',
   F: 'F',
+  D: 'D',
+  C: 'C',
+  B: 'B',
+  A: 'A',
 };
 
 export const SEVERITY_LEVEL_TYPES = {
@@ -52,14 +52,14 @@ export const severityGroups = [
     severityLevelsIncluded: [SEVERITY_LEVEL_TYPES.critical],
   },
   {
-    type: SEVERITY_GROUP_TYPES.E,
-    name: __('E'),
+    type: SEVERITY_GROUP_TYPES.D,
+    name: __('D'),
     description: __('High or unknown vulnerabilities present'),
     severityLevelsIncluded: [SEVERITY_LEVEL_TYPES.high, SEVERITY_LEVEL_TYPES.unknown],
   },
   {
-    type: SEVERITY_GROUP_TYPES.D,
-    name: __('D'),
+    type: SEVERITY_GROUP_TYPES.C,
+    name: __('C'),
     description: __('Medium vulnerabilities present'),
     severityLevelsIncluded: [SEVERITY_LEVEL_TYPES.medium],
   },

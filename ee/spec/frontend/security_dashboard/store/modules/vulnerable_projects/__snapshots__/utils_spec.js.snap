@@ -31,7 +31,7 @@ Array [
   },
   Object {
     "description": "High or unknown vulnerabilities present",
-    "name": "E",
+    "name": "D",
     "projects": Array [
       Object {
         "id": "id",
@@ -55,7 +55,7 @@ Array [
   },
   Object {
     "description": "Medium vulnerabilities present",
-    "name": "D",
+    "name": "C",
     "projects": Array [
       Object {
         "id": "id",

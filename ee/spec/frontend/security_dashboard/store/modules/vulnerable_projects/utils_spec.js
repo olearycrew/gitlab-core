@@ -71,9 +71,9 @@ describe('SeverityLevels store utils', () => {
     it.each`
       vulnerabilityType | expectedSeverityGroup
       ${'critical'}     | ${'F'}
-      ${'high'}         | ${'E'}
-      ${'unknown'}      | ${'E'}
-      ${'medium'}       | ${'D'}
+      ${'high'}         | ${'D'}
+      ${'unknown'}      | ${'D'}
+      ${'medium'}       | ${'C'}
       ${'low'}          | ${'B'}
       ${'none'}         | ${'A'}
     `(
