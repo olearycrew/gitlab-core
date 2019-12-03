@@ -57,11 +57,16 @@ class GitlabSchema < GraphQL::Schema
       object.to_global_id
     end
 
-    def object_from_id(global_id, _ctx = nil)
+    def object_from_id(global_id, ctx = {})
+      expected_type = ctx[:expected_type]
       gid = GlobalID.parse(global_id)
 
       unless gid
         raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab id."
+      end
+
+      if expected_type && !(gid.model_class <= expected_type)
+        raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid id for #{expected_type}."
       end
 
       if gid.model_class < ApplicationRecord
