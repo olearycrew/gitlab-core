@@ -153,6 +153,11 @@ msgid_plural "%d more comments"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "%d project"
+msgid_plural "%d projects"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d request with warnings"
 msgid_plural "%d requests with warnings"
 msgstr[0] ""
@@ -634,6 +639,9 @@ msgid "<strong>%{pushes}</strong> pushes, more than <strong>%{commits}</strong> 
 msgstr ""
 
 msgid "<strong>Deletes</strong> source branch"
+msgstr ""
+
+msgid "A"
 msgstr ""
 
 msgid "A 'Runner' is a process which runs a job. You can set up as many Runners as you need."
@@ -2362,6 +2370,9 @@ msgstr ""
 msgid "Average per day: %{average}"
 msgstr ""
 
+msgid "B"
+msgstr ""
+
 msgid "Background Color"
 msgstr ""
 
@@ -2825,6 +2836,9 @@ msgid "By default, all projects and groups will use the global notifications set
 msgstr ""
 
 msgid "ByAuthor|by"
+msgstr ""
+
+msgid "C"
 msgstr ""
 
 msgid "CHANGELOG"
@@ -5060,6 +5074,9 @@ msgstr ""
 msgid "Creation date"
 msgstr ""
 
+msgid "Critical vulnerabilities present"
+msgstr ""
+
 msgid "Cron Timezone"
 msgstr ""
 
@@ -5309,6 +5326,9 @@ msgid "CycleAnalytics|project dropdown filter"
 msgstr ""
 
 msgid "CycleAnalytics|stage dropdown"
+msgstr ""
+
+msgid "D"
 msgstr ""
 
 msgid "DNS"
@@ -7170,6 +7190,9 @@ msgid "ExternalWikiService|Replaces the link to the internal wiki with a link to
 msgstr ""
 
 msgid "ExternalWikiService|The URL of the external Wiki"
+msgstr ""
+
+msgid "F"
 msgstr ""
 
 msgid "Facebook"
@@ -9105,6 +9128,9 @@ msgstr ""
 msgid "Hiding all labels"
 msgstr ""
 
+msgid "High or unknown vulnerabilities present"
+msgstr ""
+
 msgid "Highest number of requests per minute for each raw path, default to 300. To disable throttling set to 0."
 msgstr ""
 
@@ -10493,6 +10519,9 @@ msgstr ""
 msgid "Logs|To see the pod logs, deploy your code to an environment."
 msgstr ""
 
+msgid "Low vulnerabilities present"
+msgstr ""
+
 msgid "MB"
 msgstr ""
 
@@ -10731,6 +10760,9 @@ msgid "May"
 msgstr ""
 
 msgid "Median"
+msgstr ""
+
+msgid "Medium vulnerabilities present"
 msgstr ""
 
 msgid "Member lock"
@@ -11647,6 +11679,9 @@ msgid "No vulnerabilities found for this pipeline"
 msgstr ""
 
 msgid "No vulnerabilities found for this project"
+msgstr ""
+
+msgid "No vulnerabilities present"
 msgstr ""
 
 msgid "No, directly import the existing email addresses and usernames."
@@ -13382,6 +13417,12 @@ msgstr ""
 msgid "Project path"
 msgstr ""
 
+msgid "Project security status"
+msgstr ""
+
+msgid "Project security status help page"
+msgstr ""
+
 msgid "Project slug"
 msgstr ""
 
@@ -13751,6 +13792,9 @@ msgstr ""
 msgid "Projects Successfully Retrieved"
 msgstr ""
 
+msgid "Projects scored by vulnerability severity type detected"
+msgstr ""
+
 msgid "Projects shared with %{group_name}"
 msgstr ""
 
@@ -13758,6 +13802,21 @@ msgid "Projects that belong to a group are prefixed with the group namespace. Ex
 msgstr ""
 
 msgid "Projects to index"
+msgstr ""
+
+msgid "Projects with critical vulnerabilities"
+msgstr ""
+
+msgid "Projects with high or unknown vulnerabilities"
+msgstr ""
+
+msgid "Projects with low vulnerabilities"
+msgstr ""
+
+msgid "Projects with medium vulnerabilities"
+msgstr ""
+
+msgid "Projects with no vulnerabilities and security scanning enabled"
 msgstr ""
 
 msgid "Projects with write access"
@@ -20811,6 +20870,9 @@ msgstr ""
 msgid "created"
 msgstr ""
 
+msgid "critical"
+msgstr ""
+
 msgid "customize"
 msgstr ""
 
@@ -20929,6 +20991,9 @@ msgstr ""
 msgid "here"
 msgstr ""
 
+msgid "high"
+msgstr ""
+
 msgid "https://your-bitbucket-server"
 msgstr ""
 
@@ -21027,6 +21092,9 @@ msgstr ""
 msgid "log in"
 msgstr ""
 
+msgid "low"
+msgstr ""
+
 msgid "manual"
 msgstr ""
 
@@ -21037,6 +21105,9 @@ msgid "math|There was an error rendering this math block"
 msgstr ""
 
 msgid "may expose confidential information"
+msgstr ""
+
+msgid "medium"
 msgstr ""
 
 msgid "merge request"
@@ -21561,6 +21632,9 @@ msgid "triggered"
 msgstr ""
 
 msgid "unicode domains should use IDNA encoding"
+msgstr ""
+
+msgid "unknown"
 msgstr ""
 
 msgid "updated"
