@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+import { __ } from '~/locale';
+import createFlash from '~/flash';
+
 import { SET_LOADING, SET_PROJECTS, SET_HAS_ERRORS } from './mutation_types';
 
 export const fetchProjects = ({ dispatch }, endpoint) => {
@@ -26,6 +29,8 @@ export const receiveProjectsSuccess = ({ commit }, payload) => {
 };
 
 export const receiveProjectsError = ({ commit }) => {
+  createFlash(__('Unable to fetch vulnerable projects'));
+
   commit(SET_HAS_ERRORS, true);
 };
 
