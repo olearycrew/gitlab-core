@@ -53,7 +53,7 @@ describe('AccordionItem component', () => {
       expect(contentContainer().element.style.maxHeight).toBeFalsy();
     });
 
-    it('limits the content height to the injected "contentMaxHeight" value', () => {
+    it('has "maxHeight" prop that limits the height of the content container to the given value', () => {
       wrapper.setProps({ maxHeight: '200px' });
 
       return wrapper.vm.$nextTick().then(() => {
@@ -140,7 +140,7 @@ describe('AccordionItem component', () => {
       expect(expansionTrigger().attributes('id')).toBe('mockUniqueId');
     });
 
-    it('contains a expansion trigger element with a unique, namespaced id', () => {
+    it('contains a content-container element with a unique, namespaced id', () => {
       expect(uniqueId).toHaveBeenCalledWith('gl-accordion-content-container-');
       expect(contentContainer().attributes('id')).toBe('mockUniqueId');
     });
@@ -162,7 +162,7 @@ describe('AccordionItem component', () => {
       );
     });
 
-    it('has a content element that has a "aria-labelledby" attribute, which points to the trigger element', () => {
+    it('has a content-container element that has a "aria-labelledby" attribute, which points to the trigger element', () => {
       expect(contentContainer().attributes('aria-labelledby')).toBeTruthy();
       expect(contentContainer().attributes('aria-labelledby')).toBe(
         expansionTrigger().attributes('id'),

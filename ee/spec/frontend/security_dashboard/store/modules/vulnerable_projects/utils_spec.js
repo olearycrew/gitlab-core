@@ -7,6 +7,8 @@ import {
   groupBySeverityLevel,
 } from 'ee/security_dashboard/store/modules/vulnerable_projects/utils';
 
+import { severityGroups } from 'ee/security_dashboard/store/modules/vulnerable_projects/constants';
+
 const createMockProjectWithZeroVulnerabilities = () => ({
   id: 'id',
   full_name: 'full_name',
@@ -79,7 +81,9 @@ describe('SeverityLevels store utils', () => {
     `(
       'returns $expectedSeverityGroup for the given $vulnerabilityType',
       ({ vulnerabilityType, expectedSeverityGroup }) => {
-        expect(getSeverityGroupForType(vulnerabilityType).name).toBe(expectedSeverityGroup);
+        expect(getSeverityGroupForType(severityGroups, vulnerabilityType).name).toBe(
+          expectedSeverityGroup,
+        );
       },
     );
   });

@@ -4,7 +4,7 @@ exports[`SeverityLevels store utils getProjectData takes a project and its most 
 Object {
   "id": "id",
   "mostSevere": Object {
-    "count": undefined,
+    "count": null,
     "name": "bar",
   },
   "name": "full_name",
@@ -94,7 +94,7 @@ Array [
       Object {
         "id": "id",
         "mostSevere": Object {
-          "count": undefined,
+          "count": null,
           "name": "none",
         },
         "name": "full_name",
