@@ -288,6 +288,9 @@ msgstr ""
 msgid "%{link_start}Read more%{link_end} about role permissions"
 msgstr ""
 
+msgid "%{link} can be used for binding events when something is happening within the project."
+msgstr ""
+
 msgid "%{listToShow}, and %{awardsListLength} more."
 msgstr ""
 
@@ -11640,6 +11643,9 @@ msgstr ""
 msgid "No vulnerabilities found for this project"
 msgstr ""
 
+msgid "No webhooks found, add one in the form above."
+msgstr ""
+
 msgid "No, directly import the existing email addresses and usernames."
 msgstr ""
 
@@ -15033,6 +15039,9 @@ msgstr ""
 msgid "SSL Verification"
 msgstr ""
 
+msgid "SSL Verification:"
+msgstr ""
+
 msgid "Saturday"
 msgstr ""
 
@@ -17017,6 +17026,9 @@ msgid "System header and footer"
 msgstr ""
 
 msgid "System hook was successfully updated."
+msgstr ""
+
+msgid "System hooks"
 msgstr ""
 
 msgid "System metrics (Custom)"

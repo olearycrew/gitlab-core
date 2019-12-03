@@ -37,4 +37,12 @@ class WebHook < ApplicationRecord
   def allow_local_requests?
     Gitlab::CurrentSettings.allow_local_requests_from_web_hooks_and_services?
   end
+
+  def pluralized_name
+    _('Webhooks')
+  end
+
+  def help_path
+    'user/project/integrations/webhooks'
+  end
 end

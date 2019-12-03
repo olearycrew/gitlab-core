@@ -1,15 +1,6 @@
 # frozen_string_literal: true
 
 module HooksHelper
-  def link_to_hook_docs(hook)
-    case hook
-    when SystemHook
-      link_to _('System hooks'), help_page_path('system_hooks/system_hooks')
-    else
-      link_to _('Webhooks'), help_page_path('user/project/integrations/webhooks')
-    end
-  end
-
   def link_to_test_hook(hook, trigger)
     path = case hook
            when GroupHook

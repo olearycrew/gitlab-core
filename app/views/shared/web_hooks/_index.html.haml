@@ -2,7 +2,7 @@
 .card
   .card-header
     %h5
-      = _("#{hook_class.underscore.humanize.titleize.pluralize}")
+      = hook_class.underscore.humanize.titleize.pluralize
       (#{hooks.count})
 
   - if hooks.any?
