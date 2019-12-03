@@ -9,8 +9,10 @@ class Packages::Dependency < ApplicationRecord
     uniqueness: { scope: %i[package_id version_pattern] }
 
   NAME_VERSION_PATTERN_TUPLE_MATCHING = '(name, version_pattern) = (?, ?)'.freeze
+  MAX_STRING_LENGTH = 255.freeze
 
   def self.for_names_and_version_patterns(names_and_version_patterns = {}, chunk_size = 50, max_rows_limit = 200)
+    names_and_version_patterns.reject! { |key, value| key.size > MAX_STRING_LENGTH || value.size > MAX_STRING_LENGTH }
     matched_ids = []
     names_and_version_patterns.each_slice(chunk_size) do |tuples|
       where_statement = Array.new(tuples.size, NAME_VERSION_PATTERN_TUPLE_MATCHING)

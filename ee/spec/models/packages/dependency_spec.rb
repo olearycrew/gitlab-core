@@ -31,10 +31,24 @@ RSpec.describe Packages::Dependency, type: :model do
       it { is_expected.to be_empty }
     end
 
-    context 'with unknown versions' do
+    context 'with unknown version patterns' do
       let(:names_and_version_patterns) { { 'foo' => '~1.0.0beta' } }
 
       it { is_expected.to be_empty }
+    end
+
+    context 'with a name bigger than column size' do
+      let_it_be(:big_name) { 'a' * (Packages::Dependency::MAX_STRING_LENGTH + 1) }
+      let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2).merge(big_name => '~1.0.0') }
+
+      it { is_expected.to match_array([package_dependency1, package_dependency2]) }
+    end
+
+    context 'with a version pattern bigger than column size' do
+      let_it_be(:big_version_pattern) { 'a' * (Packages::Dependency::MAX_STRING_LENGTH + 1) }
+      let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2).merge('test' => big_version_pattern) }
+
+      it { is_expected.to match_array([package_dependency1, package_dependency2]) }
     end
 
     context 'with parameters size' do
