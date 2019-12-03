@@ -18,6 +18,23 @@ describe DesignManagement::DesignAtVersion do
     end
   end
 
+  describe '#==' do
+    it 'has structural semantics' do
+      design = create(:design, issue: issue)
+      version = create(:design_version, designs: [design], issue: issue)
+
+      expect(described_class.new(design: design, version: version)).to eq(described_class.new(design: design, version: version))
+    end
+
+    it 'does not admit false positives' do
+      design = create(:design, issue: issue)
+      version_a = create(:design_version, designs: [design], issue: issue)
+      version_b = create(:design_version, designs: [design], issue: issue)
+
+      expect(described_class.new(design: design, version: version_a)).not_to eq(described_class.new(design: design, version: version_b))
+    end
+  end
+
   describe 'validations' do
     subject(:design_at_version) { build(:design_at_version) }
 

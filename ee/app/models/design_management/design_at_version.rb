@@ -27,9 +27,19 @@ class DesignManagement::DesignAtVersion
     "#{design.id}.#{version.id}"
   end
 
-  def global_id
+  def ==(other)
+    return false unless other.is_a?(self.class)
+
+    other.id == id
+  end
+
+  alias_method :eql?, :==
+
+  def to_global_id
     Gitlab::GlobalId.build(model_name: 'DesignManagement::DesignAtVersion', id: id)
   end
+
+  alias_method :global_id, :to_global_id
 
   def save!
     validate!
