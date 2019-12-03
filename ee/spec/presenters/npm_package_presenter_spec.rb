@@ -34,7 +34,7 @@ describe NpmPackagePresenter do
       it { expect(subject[package1.version]).to match_schema('public_api/v4/packages/npm_package_version', dir: 'ee') }
       it { expect(subject[package2.version]).to match_schema('public_api/v4/packages/npm_package_version', dir: 'ee') }
       NpmPackagePresenter::NPM_VALID_DEPENDENCY_TYPES.each do |dependency_type|
-        it { expect(subject.dig(package1.version, dependency_type)).to be_any }
+        it { expect(subject.dig(package1.version, dependency_type.to_s)).to be_any }
       end
     end
   end

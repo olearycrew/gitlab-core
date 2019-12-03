@@ -54,18 +54,18 @@ class NpmPackagePresenter
   end
 
   def build_package_dependencies(package)
-    return {} unless package.dependency_links.exists?
+    return {} if package.dependency_links.empty?
 
     dependencies = Hash.new { |h, key| h[key] = {} }
-    NPM_VALID_DEPENDENCY_TYPES.each do |dependency_type|
-      dependency_links = package.dependency_links
-                                .with_dependency_type(dependency_type)
+    dependency_links = package.dependency_links
+                              .with_dependency_type(NPM_VALID_DEPENDENCY_TYPES)
+                              .includes(:dependency)
 
-      dependency_links.find_each do |dependency_link|
-        dependency = dependency_link.dependency
-        dependencies[dependency_type][dependency.name] = dependency.version_pattern
-      end
+    dependency_links.find_each do |dependency_link|
+      dependency = dependency_link.dependency
+      dependencies[dependency_link.dependency_type][dependency.name] = dependency.version_pattern
     end
+
     dependencies
   end
 
