@@ -18,12 +18,12 @@ It can be accessed through a project's sidebar nav.
 
 ![Screenshot of the link to the security configuration page in a project's sidebar nav](../img/security_configuration_nav_v12_5.png)
 
-The page uses the project's latest default branch [CI pipeline](../../../ci/pipelines) to
+The page uses the project's latest default branch [CI pipeline](../../../ci/pipelines.md) to
 determine the configuration state of each feature. If a job with the
 expected security report artifact exists in the pipeline,
 the feature is considered configured.
 
-Note: if the latest pipeline used [Auto DevOps](../../../topics/autodevops/index),
+Note: if the latest pipeline used [Auto DevOps](../../../topics/autodevops/index.md),
 all security features will be configured by default.
 
 ## Limitations
