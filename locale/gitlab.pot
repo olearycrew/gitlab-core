@@ -15036,9 +15036,6 @@ msgstr ""
 msgid "SSH public key"
 msgstr ""
 
-msgid "SSL Verification"
-msgstr ""
-
 msgid "SSL Verification:"
 msgstr ""
 
