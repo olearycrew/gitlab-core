@@ -90,7 +90,7 @@ describe('SeverityLevels store utils', () => {
 
   describe('getSeverityGroupsData', () => {
     it("returns a map with the given severity levels containing an empty 'projects' array", () => {
-      const severityGroups = [
+      const mockSeverityGroups = [
         {
           type: 'foo',
           name: 'fooName',
@@ -105,7 +105,7 @@ describe('SeverityLevels store utils', () => {
         },
       ];
 
-      expect(getSeverityGroupsData(severityGroups)).toStrictEqual({
+      expect(getSeverityGroupsData(mockSeverityGroups)).toStrictEqual({
         foo: {
           name: 'fooName',
           description: 'fooDescription',
