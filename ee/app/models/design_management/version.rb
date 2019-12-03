@@ -3,6 +3,7 @@
 class DesignManagement::Version < ApplicationRecord
   include Importable
   include ShaAttribute
+  include Gitlab::Utils::StrongMemoize
 
   NotSameIssue = Class.new(StandardError)
 
