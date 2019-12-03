@@ -44,6 +44,10 @@ module EE
         nav_tabs << :dependencies
       end
 
+      if can?(current_user, :read_project_security_dashboard, @project)
+        nav_tabs << :security_configuration
+      end
+
       if ::Feature.enabled?(:licenses_list) && can?(current_user, :read_licenses_list, project)
         nav_tabs << :licenses
       end
@@ -140,7 +144,7 @@ module EE
 
     def sidebar_security_paths
       %w[
-        projects/security/configuration#index
+        projects/security/configuration#show
         projects/security/dashboard#show
         projects/dependencies#show
         projects/licenses#show
