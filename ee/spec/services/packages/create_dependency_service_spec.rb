@@ -3,11 +3,9 @@ require 'spec_helper'
 
 describe Packages::CreateDependencyService do
   describe '#execute' do
-    let(:namespace) {create(:namespace)}
-    let(:project) { create(:project, namespace: namespace) }
-    let(:user) { create(:user) }
-    let(:version) { '1.0.1'.freeze }
-    let(:package_name) { "@#{namespace.path}/my-app".freeze }
+    let_it_be(:namespace) {create(:namespace)}
+    let_it_be(:version) { '1.0.1'.freeze }
+    let_it_be(:package_name) { "@#{namespace.path}/my-app".freeze }
 
     context 'when packages are published' do
       let(:json_file) { 'npm/payload.json' }
@@ -19,7 +17,7 @@ describe Packages::CreateDependencyService do
       end
       let(:package_version) { params[:versions].keys.first }
       let(:dependencies) { params[:versions][package_version] }
-      let!(:package) { create(:npm_package) }
+      let(:package) { create(:npm_package) }
       let(:dependency_names) { package.dependencies.map(&:name).sort }
       let(:dependency_link_types) { package.dependency_links.map(&:dependency_type).sort }
 
