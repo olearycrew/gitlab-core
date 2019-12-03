@@ -17,7 +17,10 @@ class Packages::Dependency < ApplicationRecord
     names_and_version_patterns.each_slice(chunk_size) do |tuples|
       where_statement = Array.new(tuples.size, NAME_VERSION_PATTERN_TUPLE_MATCHING)
                              .join(' OR ')
-      matched_ids.concat(where(where_statement, *tuples.flatten).pluck(:id))
+      ids = where(where_statement, *tuples.flatten)
+              .limit(max_rows_limit + 1)
+              .pluck(:id)
+      matched_ids.concat(ids)
 
       raise ArgumentError, "Parameters select too many Dependencies" if matched_ids.size > max_rows_limit
     end
