@@ -59,7 +59,7 @@ class NpmPackagePresenter
     dependencies = Hash.new { |h, key| h[key] = {} }
     dependency_links = package.dependency_links
                               .with_dependency_type(NPM_VALID_DEPENDENCY_TYPES)
-                              .includes(:dependency)
+                              .includes_dependency
 
     dependency_links.find_each do |dependency_link|
       dependency = dependency_link.dependency

@@ -13,7 +13,7 @@ RSpec.describe Packages::DependencyLink, type: :model do
     it { is_expected.to validate_presence_of(:package) }
     it { is_expected.to validate_presence_of(:dependency) }
 
-    context 'package_id + package_dependency_id uniqueness for dependency_type' do
+    context 'package_id and package_dependency_id uniqueness for dependency_type' do
       it 'is not valid' do
         exisiting_link = subject
         link = build(
@@ -30,9 +30,9 @@ RSpec.describe Packages::DependencyLink, type: :model do
   end
 
   describe '.with_dependency_type' do
-    let!(:link1) { create(:packages_dependency_link) }
-    let!(:link2) { create(:packages_dependency_link, package: link1.package, dependency: link1.dependency, dependency_type: :devDependencies) }
-    let!(:link3) { create(:packages_dependency_link, package: link1.package, dependency: link1.dependency, dependency_type: :bundleDependencies) }
+    let_it_be(:link1) { create(:packages_dependency_link) }
+    let_it_be(:link2) { create(:packages_dependency_link, package: link1.package, dependency: link1.dependency, dependency_type: :devDependencies) }
+    let_it_be(:link3) { create(:packages_dependency_link, package: link1.package, dependency: link1.dependency, dependency_type: :bundleDependencies) }
 
     subject { described_class }
 
