@@ -10,9 +10,12 @@ class Packages::Dependency < ApplicationRecord
 
   NAME_VERSION_PATTERN_TUPLE_MATCHING = '(name, version_pattern) = (?, ?)'.freeze
   MAX_STRING_LENGTH = 255.freeze
+  MAX_CHUNKED_QUERIES_COUNT = 10.freeze
 
   def self.for_package_names_and_version_patterns(package, names_and_version_patterns = {}, chunk_size = 50, max_rows_limit = 200)
     names_and_version_patterns.reject! { |key, value| key.size > MAX_STRING_LENGTH || value.size > MAX_STRING_LENGTH }
+    raise ArgumentError, 'Too many names_and_version_patterns' if names_and_version_patterns.size > MAX_CHUNKED_QUERIES_COUNT * chunk_size
+
     matched_ids = []
     names_and_version_patterns.each_slice(chunk_size) do |tuples|
       where_statement = Array.new(tuples.size, NAME_VERSION_PATTERN_TUPLE_MATCHING)
@@ -23,7 +26,7 @@ class Packages::Dependency < ApplicationRecord
               .pluck(:id)
       matched_ids.concat(ids)
 
-      raise ArgumentError, "Parameters select too many Dependencies" if matched_ids.size > max_rows_limit
+      raise ArgumentError, 'Too many Dependencies selected' if matched_ids.size > max_rows_limit
     end
 
     return none if matched_ids.empty?

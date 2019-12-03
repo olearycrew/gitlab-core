@@ -53,6 +53,13 @@ RSpec.describe Packages::Dependency, type: :model do
       it { is_expected.to match_array([package_dependency1, package_dependency2]) }
     end
 
+    context 'with too big parameter' do
+      let(:size) { (Packages::Dependency::MAX_CHUNKED_QUERIES_COUNT * chunk_size) + 1 }
+      let(:names_and_version_patterns) { Hash[(1..size).map { |v| [v, v] }] }
+
+      it { expect { subject }.to raise_error(ArgumentError, 'Too many names_and_version_patterns') }
+    end
+
     context 'with parameters size' do
       let_it_be(:package_dependency3) { create(:packages_dependency, package: package_dependency1.package, name: 'foo3', version_pattern: '~1.5.3') }
       let_it_be(:package_dependency4) { create(:packages_dependency, package: package_dependency1.package, name: 'foo4', version_pattern: '~1.5.4') }
@@ -70,7 +77,7 @@ RSpec.describe Packages::Dependency, type: :model do
       context 'selecting too many rows' do
         let(:rows_limit) { 2 }
 
-        it { expect { subject }.to raise_error(ArgumentError, 'Parameters select too many Dependencies') }
+        it { expect { subject }.to raise_error(ArgumentError, 'Too many Dependencies selected') }
       end
     end
 
