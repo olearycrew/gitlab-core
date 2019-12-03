@@ -48,7 +48,7 @@ class DesignManagement::Version < ApplicationRecord
   delegate :project, to: :issue
 
   scope :for_designs, -> (designs) do
-    where(id: Action.where(design_id: designs).select(:version_id)).distinct
+    where(id: DesignManagement::Action.where(design_id: designs).select(:version_id)).distinct
   end
   scope :earlier_or_equal_to, -> (version) { where('id <= ?', version) }
   scope :ordered, -> { order(id: :desc) }

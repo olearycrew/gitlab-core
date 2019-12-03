@@ -99,9 +99,9 @@ class DesignManagement::DesignAtVersion
       v_cols = res.columns.drop(n)
 
       res.rows.map do |row|
-        d = Design.instantiate(d_cols.zip(row.take(n)).to_h)
-        v = Version.instantiate(v_cols.zip(row.drop(n)).to_h)
-        DesignAtVersion.new(design: d, version: v)
+        d = ::DesignManagement::Design.instantiate(d_cols.zip(row.take(n)).to_h)
+        v = ::DesignManagement::Version.instantiate(v_cols.zip(row.drop(n)).to_h)
+        ::DesignManagement::DesignAtVersion.new(design: d, version: v)
       end
     end
     alias_method :to_a, :to_records
