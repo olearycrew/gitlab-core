@@ -34,7 +34,7 @@ module Packages
     end
 
     def find_existing_ids_and_names(names_and_version_patterns)
-      existing_rows = package.dependencies.for_names_and_version_patterns(names_and_version_patterns)
+      existing_rows = Packages::Dependency.for_package_names_and_version_patterns(package, names_and_version_patterns)
                                           .pluck_ids_and_names
       [existing_rows.map(&:first) || [], existing_rows.map(&:second) || []]
     end

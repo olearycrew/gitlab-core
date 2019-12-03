@@ -16,12 +16,14 @@ RSpec.describe Packages::Dependency, type: :model do
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:package_id, :version_pattern) }
   end
 
-  describe '.for_names_and_version_patterns' do
+  describe '.for_package_names_and_version_patterns' do
     let_it_be(:package_dependency1) { create(:packages_dependency, name: 'foo', version_pattern: '~1.0.0') }
     let_it_be(:package_dependency2) { create(:packages_dependency, package: package_dependency1.package, name: 'bar', version_pattern: '~2.5.0') }
     let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2) }
+    let(:chunk_size) { 50 }
+    let(:rows_limit) { 50 }
 
-    subject { Packages::Dependency.for_names_and_version_patterns(names_and_version_patterns) }
+    subject { Packages::Dependency.for_package_names_and_version_patterns(package_dependency1.package, names_and_version_patterns, chunk_size, rows_limit) }
 
     it { is_expected.to match_array([package_dependency1, package_dependency2]) }
 
@@ -58,10 +60,6 @@ RSpec.describe Packages::Dependency, type: :model do
       let_it_be(:package_dependency6) { create(:packages_dependency, package: package_dependency1.package, name: 'foo6', version_pattern: '~1.5.6') }
       let_it_be(:package_dependency7) { create(:packages_dependency, package: package_dependency1.package, name: 'foo7', version_pattern: '~1.5.7') }
       let(:names_and_version_patterns) { build_names_and_version_patterns(package_dependency1, package_dependency2, package_dependency3, package_dependency4, package_dependency5, package_dependency6, package_dependency7) }
-      let(:chunk_size) { 50 }
-      let(:rows_limit) { 50 }
-
-      subject { Packages::Dependency.for_names_and_version_patterns(names_and_version_patterns, chunk_size, rows_limit) }
 
       context 'above the chunk size' do
         let(:chunk_size) { 2 }
